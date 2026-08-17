@@ -1,13 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "//": "Repo root config. The Astro project lives in site/, so this file drives the build from the repository root and no Root Directory setting is required. If Root Directory is ever set to site/, this file stops applying and the settings move with it.",
   "framework": null,
   "installCommand": "cd site && npm ci",
   "buildCommand": "cd site && npx playwright install chromium && npm run build",
   "outputDirectory": "site/dist",
   "headers": [
     {
-      "//": "Generated sheets: revalidated often enough that a corrected chart reaches readers, cached long enough at the edge to be free.",
       "source": "/sheets/(.*)",
       "headers": [
         {
@@ -17,7 +15,6 @@
       ]
     },
     {
-      "//": "Content-hashed assets never change under the same name.",
       "source": "/_astro/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },

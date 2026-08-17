@@ -1,7 +1,6 @@
 {
   "name": "workshopcharts",
   "private": true,
-  "//": "The site itself is in site/. This root manifest exists so the host can see which Node version the build needs: check:data uses --experimental-strip-types, which requires Node 22.6 or newer.",
   "engines": {
     "node": ">=22.6"
   },
