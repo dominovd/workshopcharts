@@ -12,6 +12,8 @@
  * a control that promises something the site does not have. It enters the nav
  * the day the first one ships.
  */
+import BrandMark from './BrandMark.astro';
+
 const links = [
   { href: '/charts/', label: 'Charts' },
   { href: '/for-shop-class/', label: 'For Shop Class' },
@@ -34,8 +36,11 @@ const path = Astro.url.pathname;
 <header class="site-header">
   <div class="shell site-header__inner">
     <a class="wordmark" href="/">
-      <span>Workshop</span>
-      <span class="wordmark__second">Charts</span>
+      <BrandMark size={34} />
+      <span class="wordmark__text">
+        <span>Workshop</span>
+        <span class="wordmark__second">Charts</span>
+      </span>
     </a>
 
     <nav aria-label="Main">
@@ -92,14 +97,20 @@ const path = Astro.url.pathname;
   }
 
   .wordmark {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    text-decoration: none;
+  }
+
+  .wordmark__text {
+    display: grid;
     font-family: var(--font-display);
     font-weight: 700;
     font-size: var(--step-1);
     line-height: 0.94;
     letter-spacing: -0.02em;
     text-transform: uppercase;
-    text-decoration: none;
-    display: grid;
   }
 
   /* Colour used as accent and doubled by the underline, never carrying meaning. */

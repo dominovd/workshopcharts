@@ -128,7 +128,23 @@ for (const file of files) {
   const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
   for (const img of imgs) {
     const alt = img.match(/alt="([^"]*)"/)?.[1];
-    if (!alt || alt.length < 20) fail(url, `<img> has no useful alt: ${img.slice(0, 90)}`);
+    const decorative = /aria-hidden="true"/.test(img);
+
+    /**
+     * An empty alt is the CORRECT markup for a decorative image, and only for one.
+     * The binder clip and the trade icons carry nothing the copy does not already
+     * say, so they are `alt="" aria-hidden="true"`. Anything else needs a real
+     * description: a sheet thumbnail with no alt is a missing asset to a reader who
+     * cannot see it.
+     */
+    if (alt === undefined) {
+      fail(url, `<img> has no alt attribute at all: ${img.slice(0, 90)}`);
+    } else if (alt === '' && !decorative) {
+      fail(url, `<img> has an empty alt but is not marked aria-hidden: ${img.slice(0, 90)}`);
+    } else if (alt !== '' && alt.length < 20) {
+      fail(url, `<img> alt is too short to describe it: ${img.slice(0, 90)}`);
+    }
+
     if (!/width=/.test(img) || !/height=/.test(img)) {
       fail(url, '<img> without width and height reserves no space and shifts layout');
     }
@@ -141,8 +157,17 @@ for (const file of files) {
       (m) => m[1],
     ),
   ];
+  /**
+   * Served by the host at runtime, not built into dist/. Currently just the Web
+   * Analytics script. Deliberately a prefix list rather than a blanket rule: the
+   * reference check is what turns a missing asset into a failed build, and the only
+   * safe way to keep it is to exempt exactly what the host provides.
+   */
+  const RUNTIME_PREFIXES = ['/_vercel/'];
+
   for (const ref of new Set(refs)) {
     if (ref.startsWith('//')) continue;
+    if (RUNTIME_PREFIXES.some((prefix) => ref.startsWith(prefix))) continue;
     const candidates = ref.endsWith('/')
       ? [join(DIST, ref, 'index.html')]
       : [join(DIST, ref), join(DIST, ref, 'index.html')];
@@ -217,6 +242,51 @@ for (const file of files) {
     warnings.push(`${url}: chart page with no image — the vertical PNG is the image-pack asset`);
   }
 }
+
+/**
+ * Every asset in public/images has to be used by something.
+ *
+ * This check exists because seven images and a component were committed to the
+ * repository and no template ever referenced them: a favicon, a binder clip, four
+ * trade icons and an illustration sat in `public/` for hours while the pages that
+ * should have shown them rendered without. Nothing failed, because nothing was
+ * looking from that direction. The reference check only runs the other way, asking
+ * whether a referenced file exists.
+ *
+ * An asset nobody uses is either work that was lost or weight nobody needs, and both
+ * are worth a failed build rather than a shrug.
+ */
+async function checkEveryAssetIsUsed(allHtml) {
+  const dir = join(DIST, 'images');
+  let assets;
+  try {
+    assets = await htmlAssets(dir);
+  } catch {
+    return; // no images directory is fine
+  }
+
+  for (const asset of assets) {
+    const ref = '/' + relative(DIST, asset);
+    if (!allHtml.some((html) => html.includes(ref))) {
+      failures.push(
+        `${ref} is in public/ but no page references it. ` +
+          `Wire it into a template or remove it.`,
+      );
+    }
+  }
+}
+
+async function htmlAssets(dir) {
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await htmlAssets(full)));
+    else out.push(full);
+  }
+  return out;
+}
+
+await checkEveryAssetIsUsed(await Promise.all(files.map((f) => readFile(f, 'utf8'))));
 
 const pageCount = files.length;
 

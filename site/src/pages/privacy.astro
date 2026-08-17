@@ -10,13 +10,17 @@ import { SITE } from '../data/site.ts';
  * would be the same kind of untrue-but-conventional claim as "Made in the USA" in
  * the footer, on a site whose whole pitch is that its statements are checkable.
  *
- * If analytics are ever added, this page has to change in the same commit.
+ * The note here used to say "if analytics are ever added, this page has to change in
+ * the same commit". Analytics were added, and this is that change. Vercel Web
+ * Analytics is cookieless and stores no IP address, but it does record page views,
+ * and the honest version of this page names what it collects rather than keeping the
+ * old sentence that said nothing was loaded at all.
  */
 ---
 
 <Base
   title="Privacy | Workshop Charts"
-  description="No accounts, no cookies set by this site, no advertising and no tracking scripts. What the host logs, what happens to email you send, and how to check any of it."
+  description="No accounts, no cookies and no advertising. What the cookieless page-view analytics records, what the host logs, and what happens to email you send here."
 >
   <div class="shell page">
     <header class="page__head">
@@ -28,13 +32,33 @@ import { SITE } from '../data/site.ts';
     </header>
 
     <div class="prose">
-      <h2>No accounts, no cookies, no tracking</h2>
+      <h2>No accounts, no cookies, no advertising</h2>
       <p>
         There is nothing to sign up for, so there is no account and no password. This
-        site sets no cookies of its own and loads no advertising, no social widgets and
-        no analytics or session-recording scripts. Fonts are served from this domain
-        rather than a third-party font service, so viewing a page does not report your
-        visit to anyone else.
+        site sets no cookies, loads no advertising and no social widgets, and runs no
+        session recording. Fonts are served from this domain rather than a third-party
+        font service, so rendering a page does not report your visit to a font host.
+      </p>
+
+      <h2>Page-view analytics</h2>
+      <p>
+        The site counts page views using Vercel Web Analytics, which is cookieless.
+        It sets no cookie and writes nothing to your browser's storage; a visit is
+        identified by a hash of the request, and that hash is discarded after 24 hours.
+        No IP address is stored, and nothing is kept that would let anyone reconstruct
+        your browsing across sites or identify you.
+      </p>
+      <p>What is recorded with each page view:</p>
+      <ul>
+        <li>the time, and the page you opened</li>
+        <li>the referring site, if you arrived from a link</li>
+        <li>approximate location: country, region, city</li>
+        <li>browser, operating system and device type, with versions</li>
+      </ul>
+      <p>
+        That is used to see which charts people reach for, which is the only question
+        this project asks of its traffic. There is no advertising to target and nothing
+        is sold or shared.
       </p>
 
       <h2>What the host records</h2>
@@ -70,9 +94,10 @@ import { SITE } from '../data/site.ts';
 
       <h2>If this changes</h2>
       <p>
-        If analytics or any other third-party script is ever added, this page will say
-        so and carry the date it changed. A privacy page that describes a site's
-        intentions rather than its behaviour is worth nothing.
+        If anything else is ever added that observes visitors, this page says so and
+        carries the date it changed. It has already worked that way once: the analytics
+        section above was written in the same change that added the analytics. A privacy
+        page describing a site's intentions rather than its behaviour is worth nothing.
       </p>
 
       <h2>Questions</h2>

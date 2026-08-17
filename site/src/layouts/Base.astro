@@ -3,6 +3,7 @@ import '@fontsource-variable/archivo';
 import '@fontsource-variable/roboto-mono';
 import '../styles/global.css';
 import '../styles/print.css';
+import Analytics from '@vercel/analytics/astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
@@ -53,6 +54,19 @@ const defaultSchema = ownSchema
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+
+    {/* One SVG mark, same glyph as the wordmark in the header. */}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/*
+      Google Search Console ownership. Kept in the layout rather than only on the
+      home page: verification survives if the home page is ever restructured, and
+      Search Console accepts it on any page it can reach.
+    */}
+    <meta
+      name="google-site-verification"
+      content="1UqmsCbWVtAg-1MF5SKdYmEjDr2MU1w5r9Ct6drOhFo"
+    />
     <meta name="description" content={description} />
     {/* Canonical drops query parameters: ?units=metric is a view, not a page. */}
     <link rel="canonical" href={canonical.href} />
@@ -70,6 +84,21 @@ const defaultSchema = ownSchema
         <script type="application/ld+json" set:html={JSON.stringify(defaultSchema)} is:inline />
       )
     }
+
+    {/*
+      Vercel Web Analytics. Page views only, no Speed Insights.
+
+      It is cookieless: visitors are identified by a hash of the incoming request
+      which is discarded after 24 hours, and no IP address is stored. What it does
+      collect is listed on /privacy/, because a privacy page that describes a site's
+      intentions rather than its behaviour is worth nothing, and that page previously
+      said this site loaded no analytics at all.
+
+      The script it injects lives under /_vercel/, which is served by the host at
+      runtime rather than built into dist/, so `check-html.mjs` has an exemption for
+      that prefix and only for that prefix.
+    */}
+    <Analytics />
 
     {
       printOrientation && (

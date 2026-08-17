@@ -88,7 +88,15 @@ const siteSchema = {
         and the site's first screen finally contains an image on a cluster measuring
         96–100 % image presence in the results. */}
       <div class="hero__sheet">
-        <div class="clip" aria-hidden="true"></div>
+        <img
+          class="clip"
+          src="/images/binder-clip.png"
+          width="144"
+          height="173"
+          alt=""
+          aria-hidden="true"
+          fetchpriority="high"
+        />
         <a class="sheet" href={`/${heroChart.slug}/`}>
           <img
             src={`/sheets/${heroChart.slug}.png`}
@@ -164,6 +172,19 @@ const siteSchema = {
       {
         trades.map((t) => (
           <a class="trade" href={`/charts/#${t.id}`} data-empty={t.published === 0}>
+            {/*
+              Icon filename comes from the trade id, so a new trade cannot get a tile
+              without an icon: check-html fails on a src that is not in dist.
+            */}
+            <img
+              class="trade__icon"
+              src={`/images/trades/${t.id}.svg`}
+              width="64"
+              height="64"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+            />
             <span class="trade__label">{t.label}</span>
             <span class="trade__blurb">{t.blurb}</span>
             <span class="trade__count mono">
@@ -225,6 +246,16 @@ const siteSchema = {
   {/* Shop class ------------------------------------------------------------ */}
   <section class="section shell">
     <div class="shopclass">
+      <img
+        class="shopclass__art"
+        src="/images/shop-class-illustration.png"
+        width="600"
+        height="371"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
       <div>
         <h2>Outfit your shop class.</h2>
         <p>
@@ -293,14 +324,11 @@ const siteSchema = {
 
   .clip {
     position: absolute;
-    top: -14px;
+    top: -34px;
     left: 50%;
     translate: -50% 0;
-    width: 46px;
-    height: 26px;
-    border: 3px solid var(--ink);
-    border-radius: 3px 3px 8px 8px;
-    background: var(--paper);
+    width: 52px;
+    height: auto;
     z-index: 2;
   }
 
@@ -430,6 +458,12 @@ const siteSchema = {
     background: var(--cream);
   }
 
+  .trade__icon {
+    width: 2.6rem;
+    height: 2.6rem;
+    margin-bottom: var(--s-2);
+  }
+
   .trade__label {
     font-family: var(--font-display);
     font-weight: 700;
@@ -507,15 +541,21 @@ const siteSchema = {
 
   /* Shop class ------------------------------------------------------------- */
   .shopclass {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--s-5);
+    gap: var(--s-6);
     padding: var(--s-6);
     border: 1px solid var(--rule);
     border-radius: var(--radius);
     background: var(--cream);
+  }
+
+  .shopclass__art {
+    width: 13rem;
+    height: auto;
+    /* Decorative: it is aria-hidden and carries no information the copy lacks. */
+    mix-blend-mode: multiply;
   }
 
   .shopclass h2 {
@@ -540,6 +580,15 @@ const siteSchema = {
     .hero__sheet {
       justify-self: center;
       margin-top: var(--s-5);
+    }
+
+    .shopclass {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+
+    .shopclass__art {
+      width: 10rem;
     }
   }
 </style>
