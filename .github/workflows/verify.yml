@@ -1,14 +1,12 @@
-# Runs the four build gates on a clean machine for every push and pull request.
+# Runs the four build gates on a clean machine for every pull request.
 #
 # Worth having regardless of where the site is deployed: this project's value is
 # the checks, and a check that only ever runs on one laptop is a check with an
-# asterisk. It also renders the sheets on a runner where Playwright is fully
-# supported, which is the fallback if the host's build image cannot launch a browser.
+# asterisk. Pushes to main are covered by deploy.yml, which runs the same build and
+# deploys only if it passes, so this workflow does not duplicate that.
 name: verify
 
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 

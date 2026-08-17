@@ -1,0 +1,78 @@
+# Build here, deploy the finished output.
+#
+# Vercel's build image downloads Chromium successfully and then cannot launch it:
+# `libnspr4.so: cannot open shared object file`. The image has no apt, and relying on
+# an undocumented package manager to patch a build image is a bad foundation for a
+# project whose entire value is that the checks actually run.
+#
+# ubuntu-latest is a complete container, so `playwright install --with-deps chromium`
+# works and the printable sheets render. The host then receives a prebuilt deployment.
+#
+# Set Vercel's Git integration to OFF for this project, or every push builds twice
+# and the Vercel-side build fails on the browser again.
+#
+# Secrets required (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN        Account Settings → Tokens
+#   VERCEL_ORG_ID       from .vercel/project.json after `vercel link`, or Team settings
+#   VERCEL_PROJECT_ID   same file
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - name: Cache Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('site/package-lock.json') }}
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # check:data → astro build → render:sheets → check:html.
+      # A failure here stops the deploy, which is the point.
+      - name: Build and verify
+        run: npm run build
+
+      - name: Prepare prebuilt output
+        run: node scripts/vercel-output.mjs
+
+      - name: Deploy
+        run: npx --yes vercel@latest deploy --prebuilt --prod --token "$VERCEL_TOKEN" --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Report what shipped
+        run: |
+          {
+            echo "### Sheets"
+            ls -lh dist/sheets/*.pdf dist/sheets/*.png | awk '{print "- " $9 " (" $5 ")"}'
+            echo "### Pages"
+            echo "- $(find dist -name '*.html' | wc -l) HTML pages"
+          } >> "$GITHUB_STEP_SUMMARY"

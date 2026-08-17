@@ -12,7 +12,7 @@
     "check:types": "astro check",
     "render:sheets": "node scripts/render-sheets.mjs",
     "check:html": "node scripts/check-html.mjs",
-    "vercel-build": "playwright install chromium && npm run build"
+    "vercel:output": "node scripts/vercel-output.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.2.5",

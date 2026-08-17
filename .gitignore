@@ -24,3 +24,6 @@ PROJECT.md
 DESIGN.md
 workshop_pagemap.csv
 design/
+
+# Host artefacts: project ids and prebuilt output
+.vercel/
