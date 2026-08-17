@@ -5,8 +5,8 @@
     "node": ">=22.6"
   },
   "scripts": {
-    "build": "cd site && npm ci && npm run build",
-    "dev": "cd site && npm run dev",
-    "check": "cd site && npm run check:data"
+    "build": "npm --prefix site run build",
+    "dev": "npm --prefix site run dev",
+    "check": "npm --prefix site run check:data"
   }
 }

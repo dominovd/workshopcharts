@@ -10,14 +10,14 @@ Live site: [workshopcharts.com](https://workshopcharts.com)
 ```
 site/                        the Astro project (see site/README.md)
 package.json                 declares the Node version the build needs
+vercel.json                  one line, telling the host not to build (see below)
 .github/workflows/verify.yml the four build gates, on every pull request
 .github/workflows/deploy.yml build and deploy, on every push to main
 ```
 
 ## Where the build runs, and why not on the host
 
-**CI builds; the host receives finished output.** There is no `vercel.json` and the
-host's Git integration is off.
+**CI builds; the host receives finished output.**
 
 The reason is specific rather than a preference. `npm run build` renders the printable
 PDF and PNG sheets with headless Chromium, and Vercel's build image cannot launch it:
@@ -38,16 +38,34 @@ deploy happens, instead of on a machine that reports back afterwards.
 
 `scripts/vercel-output.mjs` converts `dist/` into `.vercel/output/`, and the cache and
 security headers live in the `config.json` it writes. A prebuilt deployment is
-configured by that file, so a `vercel.json` next to it would be a second copy of the
-truth that never applies.
+configured by that file, which is why none of that lives in `vercel.json`: it would be
+a second copy of the truth that never applies.
+
+### How the host is told not to build
+
+`vercel.json` contains exactly one line:
+
+```json
+{ "ignoreCommand": "exit 0" }
+```
+
+In the Ignored Build Step, exit 0 means *skip this build*. Git-triggered builds are
+skipped and marked as such; CLI deploys from CI are unaffected, because
+`ignoreCommand` is only consulted for Git deployments. Doing it in the repository
+rather than in a dashboard field means it travels with the code and cannot be
+forgotten when the project is re-created.
+
+Without it the host keeps building on every push and keeps failing on the browser.
+It will find whatever build script it can reach — including this repository's root
+one — so removing the script is not a substitute.
 
 ### Setting it up
 
-1. Repository secrets (Settings → Secrets and variables → Actions):
-   `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. The two ids are in
-   `.vercel/project.json` after running `vercel link` locally.
-2. Turn the host's Git integration **off** for this project. Otherwise every push
-   builds twice and the host-side build fails on the browser again.
+Repository secrets, under Settings → Secrets and variables → Actions:
+`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. The two ids appear in
+`.vercel/project.json` after running `npx vercel link` locally. `deploy.yml` checks
+for all three before it does anything else, so a missing one fails in the first
+second with the name of what is missing rather than in a CLI error four minutes in.
 
 The root `package.json` carries only `engines.node`. Node 22.6 or newer is required:
 the data checks run TypeScript directly via `--experimental-strip-types`.
