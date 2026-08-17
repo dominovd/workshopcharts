@@ -1,0 +1,55 @@
+# Runs the four build gates on a clean machine for every push and pull request.
+#
+# Worth having regardless of where the site is deployed: this project's value is
+# the checks, and a check that only ever runs on one laptop is a check with an
+# asterisk. It also renders the sheets on a runner where Playwright is fully
+# supported, which is the fallback if the host's build image cannot launch a browser.
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      # ubuntu-latest is a full container, so the system libraries chromium needs
+      # can be installed. This is the step most hosted build images cannot do.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # check:data → astro build → render:sheets → check:html
+      - name: Build and verify
+        run: npm run build
+
+      - name: Report what shipped
+        run: |
+          echo "### Sheets" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh dist/sheets/ | tail -n +2 | awk '{print "- " $9 " (" $5 ")"}' >> "$GITHUB_STEP_SUMMARY"
+          echo "### Pages" >> "$GITHUB_STEP_SUMMARY"
+          find dist -name '*.html' | wc -l | xargs -I{} echo "- {} HTML pages" >> "$GITHUB_STEP_SUMMARY"
+
+      # Kept so a failed deploy can be inspected, and so the sheets can be pulled
+      # from here if the host builds pages only.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          retention-days: 14

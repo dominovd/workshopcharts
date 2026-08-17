@@ -11,7 +11,8 @@
     "check:data": "node --experimental-strip-types scripts/check-data.ts",
     "check:types": "astro check",
     "render:sheets": "node scripts/render-sheets.mjs",
-    "check:html": "node scripts/check-html.mjs"
+    "check:html": "node scripts/check-html.mjs",
+    "vercel-build": "playwright install chromium && npm run build"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.2.5",
@@ -20,5 +21,8 @@
   },
   "devDependencies": {
     "playwright": "^1.55.0"
+  },
+  "engines": {
+    "node": ">=22.6"
   }
 }
