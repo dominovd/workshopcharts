@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site.ts';
+import { pendingVerification } from '../data/registry.ts';
+
+/**
+ * Contact.
+ *
+ * One address, no form. A form on a static site needs a third-party endpoint, and
+ * this site has no reason to route a reader's message through someone else's server.
+ *
+ * The sections are ordered by what is actually useful to receive: a correction
+ * first, because a wrong figure on a reference sheet is the one thing here that can
+ * cost somebody something.
+ */
+---
+
+<Base
+  title="Contact Workshop Charts"
+  description="Report a figure that disagrees with its standard, request a chart, or ask about classroom use. One address, answered by a person, no form and no sign-up."
+>
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">Contact</p>
+      <h1>Contact</h1>
+      <p class="lede">
+        One address, read by a person: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+    </header>
+
+    <div class="cards">
+      <section class="card card--first">
+        <h2>Found a figure that looks wrong?</h2>
+        <p>
+          This is the most valuable message the project gets, and it goes to the front
+          of the queue. Include the chart, the row, and the standard and clause you are
+          reading it against. A correction with a citation gets checked the same week.
+        </p>
+        <a class="btn btn--solid" href={`mailto:${SITE.email}?subject=Correction`}>
+          Report a correction
+        </a>
+      </section>
+
+      <section class="card">
+        <h2>Need a chart that is not here?</h2>
+        <p>
+          {pendingVerification.length} charts are drafted and waiting on a check against
+          their standard. Naming the standard yours should come from moves it up the
+          queue, because a request with a source attached is worth more here than a traffic
+          estimate.
+        </p>
+        <a class="btn" href={`mailto:${SITE.email}?subject=Chart request`}>Request a chart</a>
+      </section>
+
+      <section class="card">
+        <h2>Teaching with these?</h2>
+        <p>
+          Print and photocopy freely, no permission needed. If a unit you teach needs a
+          sheet laid out differently, with different columns or a different paper size, say so
+          and it can be built.
+        </p>
+        <a class="btn" href="/for-shop-class/">For shop class</a>
+      </section>
+    </div>
+
+    <p class="note">
+      No newsletter, no account, nothing to unsubscribe from. Mail sent here is used
+      to answer it and nothing else. See <a href="/privacy/">privacy</a>.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: var(--s-6) var(--s-7);
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+    max-width: 50ch;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+  }
+
+  .card {
+    display: grid;
+    align-content: start;
+    gap: var(--s-3);
+    padding: var(--s-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+  }
+
+  .card--first {
+    background: var(--cream);
+    border-color: var(--rule-strong);
+  }
+
+  .card h2 {
+    font-size: var(--step-1);
+  }
+
+  .card p {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .card .btn {
+    justify-self: start;
+  }
+
+  .note {
+    margin-top: var(--s-6);
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    max-width: 60ch;
+  }
+</style>

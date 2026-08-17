@@ -1,0 +1,545 @@
+---
+import Base from '../layouts/Base.astro';
+import ChartCard from '../components/ChartCard.astro';
+import {
+  publishedCharts,
+  pendingVerification,
+  trades,
+  siteCounts,
+  lastVerifiedOn,
+} from '../data/registry.ts';
+import { visibleColumns, formatCell } from '../lib/view.ts';
+import { wireGaugeChart } from '../data/charts/wire-gauge-chart.ts';
+
+/**
+ * Home.
+ *
+ * This page is a catalogue, not an artifact: no printable table, no Print/PDF/PNG
+ * bar. That is the muted.io model the project chose deliberately — every chart
+ * page creates its own demand — and it has a consequence worth stating in the
+ * code rather than discovering in a report six months from now: THE HOME PAGE
+ * HAS NO TARGET KEYWORD. It distributes authority to the chart pages, it does not
+ * collect search traffic of its own. Organic sessions on `/` should be expected
+ * to stay near zero, and that is the design working, not failing. See
+ * DECISIONS.md §9.
+ *
+ * Browse leads, search follows. A search-first hero is right at 465 charts and
+ * wrong at the number this site actually has; with a set this size the reader
+ * scans faster than they can describe what they want.
+ */
+
+const heroChart = wireGaugeChart;
+const heroColumns = visibleColumns(heroChart).slice(0, 4);
+const heroRows = heroChart.rows.slice(0, 14);
+
+const siteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Workshop Charts',
+  url: Astro.site?.href,
+  description:
+    'Printable reference charts for the workshop, with the standard behind every column named on the page.',
+  inLanguage: 'en',
+  publisher: { '@type': 'Organization', name: 'Workshop Charts', url: Astro.site?.href },
+};
+---
+
+<Base
+  title="Workshop Charts: Printable Reference Charts"
+  description="Free printable reference charts for the bench, toolbox and jobsite. Every column names the standard behind it, and every chart shows when it was last checked."
+  ogImage="/sheets/wire-gauge-chart.png"
+  ownSchema
+>
+  <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} is:inline />
+
+  {/* Hero ------------------------------------------------------------------ */}
+  <section class="hero">
+    <div class="shell hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">Reference sheets for the workshop</p>
+        {/*
+          Two block spans, not a <br>. A <br> put "need" and "Ready" together in
+          the accessible name and in anything reading the text content — "The chart
+          you need.Ready to print." Two sentences need two elements.
+        */}
+        <h1><span>The chart you need.</span> <span>Ready to print.</span></h1>
+        <p class="lede">
+          Clear, checkable reference charts for the bench, toolbox and jobsite.
+        </p>
+
+        <div class="hero__actions">
+          <a class="btn btn--solid btn--lg" href="/charts/">
+            Browse all {siteCounts.published} charts
+          </a>
+          <a class="btn btn--quiet btn--lg" href="#trades">Browse by trade</a>
+        </div>
+
+        <p class="hero__note">
+          Every column on every sheet names the standard behind it. {
+            siteCounts.inVerification
+          } more charts are drafted and held until each one is checked.
+        </p>
+      </div>
+
+      {/* The hero artifact is the actual generated sheet, not a drawing of one.
+        `/sheets/wire-gauge-chart.png` is the file the Download PNG button hands
+        over, produced by scripts/render-sheets.mjs from the same rows as the page —
+        so the home page cannot advertise a sheet that differs from the one you get,
+        and the site's first screen finally contains an image on a cluster measuring
+        96–100 % image presence in the results. */}
+      <div class="hero__sheet">
+        <div class="clip" aria-hidden="true"></div>
+        <a class="sheet" href={`/${heroChart.slug}/`}>
+          <img
+            src={`/sheets/${heroChart.slug}.png`}
+            width="1000"
+            height="1500"
+            alt={heroChart.imageAlt}
+            fetchpriority="high"
+            decoding="async"
+          />
+        </a>
+        <div class="stamp" aria-hidden="true">
+          <span>Sources</span>
+          <strong>mapped</strong>
+          <span>per column</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Three claims ---------------------------------------------------------- */}
+  <section class="claims">
+    <div class="shell claims__grid">
+      <div>
+        <h2>Sources mapped to columns</h2>
+        <p>
+          Not one citation under the table. Each column names the document it came
+          from, and the build fails if a column has none.
+        </p>
+      </div>
+      <div>
+        <h2>Date last checked</h2>
+        <p>
+          Shown on every chart. The date something was checked is a fact; a date
+          for the next check would be a promise.
+        </p>
+      </div>
+      <div>
+        <h2>Print, PDF, PNG</h2>
+        <p>
+          Sheet orientation comes from the table itself, so wide charts print
+          landscape and narrow ones portrait.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* Charts ---------------------------------------------------------------- */}
+  <section class="section shell">
+    <header class="section__head">
+      <h2>Charts on the site</h2>
+      <p>{siteCounts.published} published. Every figure recomputed on each build.</p>
+    </header>
+
+    <div class="card-grid">
+      {publishedCharts.map((chart) => <ChartCard chart={chart} />)}
+    </div>
+  </section>
+
+  {/* Trades ---------------------------------------------------------------- */}
+  <section class="section shell" id="trades">
+    <header class="section__head">
+      <h2>Browse by trade</h2>
+      <p>
+        {/* Counts come from the registry. The design draft read "125+", "140+",
+            "90+" and "110+" here — 465 charts against a first-wave map of about
+            thirty. A number on a catalogue tile is a promise the next click
+            either keeps or breaks. */}
+        Real counts, computed from what is on the site.
+      </p>
+    </header>
+
+    <div class="trade-grid">
+      {
+        trades.map((t) => (
+          <a class="trade" href={`/charts/#${t.id}`} data-empty={t.published === 0}>
+            <span class="trade__label">{t.label}</span>
+            <span class="trade__blurb">{t.blurb}</span>
+            <span class="trade__count mono">
+              {t.published > 0
+                ? `${t.published} chart${t.published === 1 ? '' : 's'}`
+                : 'none published yet'}
+            </span>
+            {t.inVerification > 0 && (
+              <span class="trade__pending mono">{t.inVerification} in verification</span>
+            )}
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* Built to be checked --------------------------------------------------- */}
+  <section class="checked">
+    <div class="shell">
+      <h2>Built to be checked.</h2>
+
+      <div class="checked__grid">
+        <div>
+          <h3>Sources per column</h3>
+          <p>
+            A wire table takes its diameters from one document and its resistance
+            from another. One source line for both would be wrong, so there is one
+            line per source with the columns it covers listed beside it.
+          </p>
+        </div>
+        <div>
+          <h3>Held until checked</h3>
+          <p>
+            {pendingVerification.length} drafted charts are not on the site, and one
+            column inside a published chart is held too. A held chart counts as work,
+            never as a chart.
+          </p>
+        </div>
+        <div>
+          <h3>Conditions on the sheet</h3>
+          <p>
+            Plating, lubrication and temperature change the number, so they sit next
+            to it, on screen and on the printed sheet, not in fine print.
+          </p>
+        </div>
+      </div>
+
+      <div class="checked__example mono">
+        <span>Example</span>
+        <code>Ampacity is not a property of a wire size</code>
+        <span class="checked__example-note">
+          It is therefore not a column on the wire gauge chart. It gets its own page,
+          with NEC 310.16 and the 240.4(D) limits, or it does not ship.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  {/* Shop class ------------------------------------------------------------ */}
+  <section class="section shell">
+    <div class="shopclass">
+      <div>
+        <h2>Outfit your shop class.</h2>
+        <p>
+          Free printable sheets that name their standards, so students can see where
+          a number comes from. Sized for handouts, stations and classroom walls.
+        </p>
+      </div>
+      <a class="btn btn--solid btn--lg" href="/for-shop-class/">Browse classroom sheets →</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero ------------------------------------------------------------------- */
+  .hero {
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--s-6);
+    align-items: center;
+    padding-block: var(--s-7) var(--s-8);
+  }
+
+  h1 {
+    margin-top: var(--s-4);
+    text-transform: none;
+  }
+
+  h1 span {
+    display: block;
+  }
+
+  .lede {
+    margin-top: var(--s-4);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+  }
+
+  .btn--lg {
+    min-height: 52px;
+    font-size: var(--step-0);
+  }
+
+  .hero__note {
+    margin-top: var(--s-4);
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    max-width: 46ch;
+  }
+
+  .hero__sheet {
+    position: relative;
+    justify-self: end;
+    width: min(100%, 27rem);
+  }
+
+  .clip {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    translate: -50% 0;
+    width: 46px;
+    height: 26px;
+    border: 3px solid var(--ink);
+    border-radius: 3px 3px 8px 8px;
+    background: var(--paper);
+    z-index: 2;
+  }
+
+  .sheet {
+    display: block;
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    box-shadow: 0 18px 40px -18px rgb(20 20 15 / 0.35);
+    padding: 10px;
+    rotate: -0.6deg;
+  }
+
+  .sheet img {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Only the top of the sheet is shown; the whole file is one click away. */
+    max-height: 26rem;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* Not a "verified" seal: nothing becomes verified by having a badge put on it.
+     This names the mechanism instead, which is the part that is actually true. */
+  .stamp {
+    position: absolute;
+    right: -0.6rem;
+    bottom: -1rem;
+    display: grid;
+    place-items: center;
+    width: 6.4rem;
+    height: 6.4rem;
+    border: 2px solid var(--lime-ink);
+    border-radius: 50%;
+    background: var(--lime-wash);
+    rotate: -8deg;
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    line-height: 1.35;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lime-ink);
+    text-align: center;
+  }
+
+  .stamp strong {
+    font-size: 0.78rem;
+  }
+
+  /* Claims ----------------------------------------------------------------- */
+  .claims {
+    border-bottom: 1px solid var(--rule);
+    background: var(--cream);
+  }
+
+  .claims__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-5);
+    padding-block: var(--s-5);
+  }
+
+  .claims h2 {
+    font-size: var(--step-0);
+    letter-spacing: -0.01em;
+  }
+
+  .claims p {
+    margin-top: var(--s-2);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 34ch;
+  }
+
+  /* Sections --------------------------------------------------------------- */
+  .section {
+    padding-block: var(--s-6);
+  }
+
+  .section:last-of-type {
+    padding-bottom: var(--s-7);
+  }
+
+  .section__head {
+    margin-bottom: var(--s-5);
+  }
+
+  .section__head h2 {
+    font-size: var(--step-3);
+  }
+
+  .section__head p {
+    margin-top: var(--s-2);
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: var(--s-4);
+  }
+
+  /* Trades ----------------------------------------------------------------- */
+  .trade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--s-4);
+  }
+
+  .trade {
+    display: grid;
+    gap: var(--s-1);
+    align-content: start;
+    padding: var(--s-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    text-decoration: none;
+    background: var(--paper);
+  }
+
+  .trade:hover {
+    border-color: var(--ink);
+  }
+
+  .trade[data-empty='true'] {
+    background: var(--cream);
+  }
+
+  .trade__label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+  }
+
+  .trade__blurb {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .trade__count {
+    margin-top: var(--s-2);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .trade__pending {
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  /* Built to be checked ---------------------------------------------------- */
+  .checked {
+    background: var(--dark);
+    color: #f4f1e6;
+    padding-block: var(--s-7);
+  }
+
+  .checked h2 {
+    font-size: var(--step-4);
+  }
+
+  .checked__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-5);
+    margin-top: var(--s-5);
+  }
+
+  .checked h3 {
+    font-size: var(--step-0);
+    color: var(--lime);
+  }
+
+  .checked p {
+    margin-top: var(--s-2);
+    font-size: var(--step--1);
+    color: #cfcbbc;
+    max-width: 40ch;
+  }
+
+  .checked__example {
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: 1px solid #3a3a31;
+    font-size: var(--step--2);
+    color: #9a968a;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-2);
+  }
+
+  .checked__example code {
+    color: var(--lime);
+    font-size: var(--step--1);
+  }
+
+  .checked__example-note {
+    flex: 1 1 22rem;
+    color: #cfcbbc;
+  }
+
+  /* Shop class ------------------------------------------------------------- */
+  .shopclass {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-5);
+    padding: var(--s-6);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+
+  .shopclass h2 {
+    font-size: var(--step-3);
+  }
+
+  .shopclass p {
+    margin-top: var(--s-3);
+    color: var(--ink-2);
+    max-width: 52ch;
+    font-size: var(--step--1);
+  }
+
+  /* Narrow --------------------------------------------------------------- */
+  @media (max-width: 900px) {
+    .hero__grid,
+    .claims__grid,
+    .checked__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__sheet {
+      justify-self: center;
+      margin-top: var(--s-5);
+    }
+  }
+</style>

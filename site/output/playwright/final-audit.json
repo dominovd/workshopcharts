@@ -1,0 +1,76 @@
+{
+  "home-final": {
+    "statusTitle": "Workshop Charts: Printable Reference Charts",
+    "canonical": "https://workshopcharts.com/",
+    "images": [
+      {
+        "src": "/sheets/wire-gauge-chart.png",
+        "ok": true,
+        "w": 1000,
+        "h": 1500
+      }
+    ],
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "desktopRows": 0,
+    "mobileRows": 0,
+    "schemas": 1,
+    "og": "https://workshopcharts.com/sheets/wire-gauge-chart.png",
+    "status": 200,
+    "errors": []
+  },
+  "wire-final": {
+    "statusTitle": "Wire Gauge Chart: AWG Diameter and Area",
+    "canonical": "https://workshopcharts.com/wire-gauge-chart/",
+    "images": [
+      {
+        "src": "/sheets/wire-gauge-chart-print.png",
+        "ok": false,
+        "w": 0,
+        "h": 0
+      },
+      {
+        "src": "/sheets/wire-gauge-chart.png",
+        "ok": false,
+        "w": 0,
+        "h": 0
+      }
+    ],
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "desktopRows": 44,
+    "mobileRows": 44,
+    "unit": "both",
+    "schemas": 3,
+    "og": "https://workshopcharts.com/sheets/wire-gauge-chart.png",
+    "status": 200,
+    "errors": []
+  },
+  "wire-mobile-final": {
+    "statusTitle": "Wire Gauge Chart: AWG Diameter and Area",
+    "canonical": "https://workshopcharts.com/wire-gauge-chart/",
+    "images": [
+      {
+        "src": "/sheets/wire-gauge-chart-print.png",
+        "ok": false,
+        "w": 0,
+        "h": 0
+      },
+      {
+        "src": "/sheets/wire-gauge-chart.png",
+        "ok": false,
+        "w": 0,
+        "h": 0
+      }
+    ],
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "desktopRows": 1,
+    "mobileRows": 1,
+    "unit": "metric",
+    "schemas": 3,
+    "og": "https://workshopcharts.com/sheets/wire-gauge-chart.png",
+    "status": 200,
+    "errors": []
+  }
+}

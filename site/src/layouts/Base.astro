@@ -1,0 +1,103 @@
+---
+import '@fontsource-variable/archivo';
+import '@fontsource-variable/roboto-mono';
+import '../styles/global.css';
+import '../styles/print.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Print orientation from the chart data. Absent on non-chart pages. */
+  printOrientation?: 'portrait' | 'landscape';
+  ogImage?: string;
+  /**
+   * Set by pages that emit their own richer graph (chart pages, the catalogue).
+   * Everything else gets a plain WebPage from here, so no page ships unmarked —
+   * four of them did on the first pass, purely because each template had to
+   * remember to do it for itself.
+   */
+  ownSchema?: boolean;
+}
+
+const { title, description, printOrientation, ogImage, ownSchema } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+/**
+ * Every page gets a share image.
+ *
+ * Eight of eleven pages had none, because only the chart templates passed one.
+ * Chart pages use their own vertical sheet, which is the right image for them; every
+ * other page falls back to a real generated sheet rather than a logo, because that
+ * is what the site is. Defaulting here means a new page cannot ship without one.
+ */
+const shareImage = ogImage ?? '/sheets/wire-gauge-chart.png';
+
+const defaultSchema = ownSchema
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      description,
+      url: canonical.href,
+      inLanguage: 'en',
+      isPartOf: { '@type': 'WebSite', name: 'Workshop Charts', url: Astro.site?.href },
+    };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {/* Canonical drops query parameters: ?units=metric is a view, not a page. */}
+    <link rel="canonical" href={canonical.href} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={new URL(shareImage, Astro.site).href} />
+    <meta property="og:image:width" content="1000" />
+    <meta property="og:image:height" content="1500" />
+    <meta property="og:site_name" content="Workshop Charts" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {
+      defaultSchema && (
+        <script type="application/ld+json" set:html={JSON.stringify(defaultSchema)} is:inline />
+      )
+    }
+
+    {
+      printOrientation && (
+        <style set:html={`@page { size: ${printOrientation === 'landscape' ? 'landscape' : 'portrait'}; margin: 12mm; }`} />
+      )
+    }
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -9999px;
+      }
+      .skip:focus {
+        left: var(--s-4);
+        top: var(--s-4);
+        z-index: 10;
+        background: var(--ink);
+        color: #fff;
+        padding: var(--s-2) var(--s-4);
+      }
+    </style>
+  </body>
+</html>

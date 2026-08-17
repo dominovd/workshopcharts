@@ -1,0 +1,283 @@
+---
+import type { Chart } from '../data/schema.ts';
+import { variantAxes, hasUnitToggle } from '../lib/view.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+const axes = variantAxes(chart);
+const unitToggle = hasUnitToggle(chart);
+
+/**
+ * Toggles hide columns with CSS over markup that is already complete.
+ *
+ * DESIGN.md §9: every variant must be in the served DOM. Nothing is fetched on
+ * click, so a crawler sees the whole table and the whole source map, and the page
+ * works with JavaScript off — the default state shows both unit systems.
+ *
+ * The selectors below cover the table cells, the source-map rows and the
+ * condition list in one pass, because all three carry the same
+ * `data-variant-*` attributes from the same column objects. That is what makes it
+ * structurally impossible for a source line to stay put while the data above it
+ * changes.
+ */
+const variantCss = axes
+  .flatMap((axis) =>
+    axis.options.map(
+      (opt) =>
+        `.chart-view[data-${axis.axis}]:not([data-${axis.axis}="${opt.option}"]) ` +
+        `[data-variant-axis="${axis.axis}"][data-variant-option="${opt.option}"] { display: none; }`,
+    ),
+  )
+  .join('\n');
+
+/**
+ * Units.
+ *
+ * This was missing on the first pass — the toggle set `data-units` on the
+ * wrapper and wrote it into the URL, and nothing consumed it, so Both, Inches and
+ * Metric produced an identical table. Exactly the defect the schema is supposed to
+ * make impossible, arriving from the direction the schema does not cover: the data
+ * was right and the stylesheet never shipped.
+ *
+ * The selectors reach table cells, source-map rows and condition items in one
+ * pass, so a source line whose columns have left the table leaves with them.
+ * `both` is the default and hides nothing, which is also the no-JavaScript state.
+ */
+const unitCss = unitToggle
+  ? [
+      '.chart-view[data-units="imperial"] [data-system="metric"] { display: none; }',
+      '.chart-view[data-units="metric"] [data-system="imperial"] { display: none; }',
+      '.chart-view[data-units="imperial"] [data-row-systems="metric"] { display: none; }',
+      '.chart-view[data-units="metric"] [data-row-systems="imperial"] { display: none; }',
+    ].join('\n')
+  : '';
+
+const toggleCss = [variantCss, unitCss].filter(Boolean).join('\n');
+---
+
+<div class="chart-controls no-print">
+  <div class="control control--search">
+    <label class="visually-hidden" for="row-filter">Find a size</label>
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+      <circle cx="6.5" cy="6.5" r="4.6" stroke="currentColor" stroke-width="1.5"></circle>
+      <path d="M10 10L14 14" stroke="currentColor" stroke-width="1.5"></path>
+    </svg>
+    <input
+      id="row-filter"
+      type="search"
+      inputmode="search"
+      autocomplete="off"
+      placeholder="Find a size…"
+    />
+  </div>
+
+  {
+    axes.map((axis) => (
+      <fieldset class="control control--toggle" data-axis={axis.axis}>
+        <legend>{axis.label}</legend>
+        {axis.options.map((opt, i) => (
+          <label>
+            <input type="radio" name={`axis-${axis.axis}`} value={opt.option} checked={i === 0} />
+            <span>{opt.label}</span>
+          </label>
+        ))}
+      </fieldset>
+    ))
+  }
+
+  {
+    unitToggle && (
+      <fieldset class="control control--toggle" data-axis="units">
+        <legend>Units</legend>
+        <label>
+          <input type="radio" name="axis-units" value="both" checked />
+          <span>Both</span>
+        </label>
+        <label>
+          <input type="radio" name="axis-units" value="imperial" />
+          <span>Inches</span>
+        </label>
+        <label>
+          <input type="radio" name="axis-units" value="metric" />
+          <span>Metric</span>
+        </label>
+      </fieldset>
+    )
+  }
+
+  <p class="control-note">
+    Both unit systems load with the page. The filter searches every column.
+  </p>
+</div>
+
+{toggleCss && <style set:html={toggleCss} is:inline />}
+
+<style>
+  .chart-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--s-4);
+    padding: var(--s-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+
+  .control--search {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex: 1 1 16rem;
+    min-height: var(--tap);
+    padding-inline: var(--s-3);
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    color: var(--ink-3);
+  }
+
+  .control--search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ink);
+    padding-block: var(--s-2);
+  }
+
+  .control--search input:focus {
+    outline: none;
+  }
+
+  .control--search:focus-within {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  legend {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    padding: 0 0 var(--s-2);
+  }
+
+  fieldset label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tap);
+    padding-inline: var(--s-4);
+    border: 1px solid var(--rule-strong);
+    margin-left: -1px;
+    background: var(--paper);
+    font-size: var(--step--1);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  fieldset label:first-of-type {
+    margin-left: 0;
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  fieldset label:last-of-type {
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  fieldset input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Selected state is carried by weight and border as well as fill, so it
+     survives greyscale and does not depend on hue alone. */
+  fieldset label:has(input:checked) {
+    background: var(--lime);
+    border-color: var(--lime-ink);
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+  }
+
+  fieldset label:has(input:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  .control-note {
+    flex: 1 1 100%;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+</style>
+
+<script>
+  // Progressive enhancement over a complete DOM: without this the table shows
+  // every column, which is a correct page, just a wider one.
+  const view = document.querySelector<HTMLElement>('.chart-view');
+  const controls = document.querySelector('.chart-controls');
+  if (view && controls) {
+    const url = new URL(window.location.href);
+
+    const apply = (axis: string, value: string, push: boolean) => {
+      view.dataset[axis] = value;
+      if (!push) return;
+      // State in the URL so a filtered view can be sent to someone (§9). The
+      // canonical link has no parameters, so this never forks the page.
+      if (value === 'both') url.searchParams.delete(axis);
+      else url.searchParams.set(axis, value);
+      history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+    };
+
+    controls.querySelectorAll<HTMLFieldSetElement>('fieldset[data-axis]').forEach((set) => {
+      const axis = set.dataset.axis!;
+      const fromUrl = url.searchParams.get(axis);
+      const inputs = set.querySelectorAll<HTMLInputElement>('input[type=radio]');
+
+      if (fromUrl) {
+        inputs.forEach((i) => {
+          i.checked = i.value === fromUrl;
+        });
+      }
+      const checked = set.querySelector<HTMLInputElement>('input:checked');
+      if (checked) apply(axis, checked.value, false);
+
+      set.addEventListener('change', (e) => {
+        const input = e.target as HTMLInputElement;
+        apply(axis, input.value, true);
+      });
+    });
+
+    const filter = document.querySelector<HTMLInputElement>('#row-filter');
+    const rows = Array.from(document.querySelectorAll<HTMLTableRowElement>('tbody tr[data-search]'));
+    const noMatch = document.querySelector<HTMLElement>('.no-match');
+
+    filter?.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase();
+      let shown = 0;
+      for (const row of rows) {
+        const match = q === '' || (row.dataset.search ?? '').includes(q);
+        row.hidden = !match;
+        if (match) shown++;
+      }
+      if (noMatch) noMatch.hidden = shown > 0;
+    });
+  }
+</script>

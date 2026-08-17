@@ -1,0 +1,152 @@
+---
+import { trades, publishedCharts, siteCounts } from '../data/registry.ts';
+import { SITE } from '../data/site.ts';
+
+/**
+ * No "Made in the USA".
+ *
+ * A reference site does not manufacture anything, and the claim cannot be
+ * substantiated as an authenticity signal. Next to a source block and a real
+ * verification date — both of which are checkable — it is the one line a reader
+ * cannot check, which costs the credibility of the lines that can be.
+ */
+const byTrade = trades.map((t) => ({
+  ...t,
+  charts: publishedCharts.filter((c) => c.trade === t.id),
+}));
+---
+
+<footer class="site-footer">
+  <div class="shell site-footer__grid">
+    <div>
+      <a class="wordmark" href="/">
+        <span>Workshop</span>
+        <span class="wordmark__second">Charts</span>
+      </a>
+      <p class="blurb">Workshop charts you can read on your phone and print for the wall.</p>
+    </div>
+
+    {
+      byTrade.map((t) => (
+        <div>
+          <h2 class="col-head">{t.label}</h2>
+          <ul>
+            {t.charts.map((c) => (
+              <li>
+                <a href={`/${c.slug}/`}>{c.title}</a>
+              </li>
+            ))}
+            {t.charts.length === 0 && <li class="muted">{t.inVerification} in verification</li>}
+          </ul>
+        </div>
+      ))
+    }
+
+    <div>
+      <h2 class="col-head">About</h2>
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/how-we-verify/">How we verify</a></li>
+        <li><a href="/for-shop-class/">For shop class</a></li>
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="shell site-footer__base mono">
+    <span>© {SITE.since} {SITE.domain}</span>
+    <span><a href={`mailto:${SITE.email}`}>{SITE.email}</a></span>
+    <span>Free to use. No sign-up. Built from published standards.</span>
+    <span>{siteCounts.published} charts published · {siteCounts.inVerification} in verification</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--s-6);
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(5, 1fr);
+    gap: var(--s-5);
+    padding-block: var(--s-6);
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: grid;
+  }
+
+  .wordmark__second {
+    border-bottom: 3px solid var(--lime);
+    width: fit-content;
+  }
+
+  .blurb {
+    margin-top: var(--s-3);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 26ch;
+  }
+
+  .col-head {
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--s-3);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  li {
+    font-size: var(--step--1);
+  }
+
+  a {
+    text-decoration: none;
+    color: var(--ink-2);
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .muted {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+
+  .site-footer__base {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-4);
+    justify-content: space-between;
+    padding-block: var(--s-4);
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 900px) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

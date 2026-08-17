@@ -1,0 +1,237 @@
+---
+import '@fontsource-variable/archivo';
+import '@fontsource-variable/roboto-mono';
+import '../styles/tokens.css';
+
+interface Props {
+  title: string;
+  /** `print` sizes to paper; `pin` is a fixed 1000×1500 canvas. */
+  mode: 'print' | 'pin';
+  orientation?: 'portrait' | 'landscape';
+  /** Printable height in points: the @page box minus its margins. */
+  sheetHeightPt?: number;
+}
+
+const { title, mode, orientation = 'portrait', sheetHeightPt } = Astro.props;
+
+/**
+ * Standalone sheet document.
+ *
+ * These routes exist so the sheet is rendered by the same engine and the same CSS
+ * as the page, rather than being drawn a second time in another language. The
+ * post-build script (`scripts/render-sheets.mjs`) loads them in headless Chromium
+ * and writes `dist/sheets/<slug>.pdf` and `.png`.
+ *
+ * They are real URLs and they are marked noindex, kept out of the sitemap and
+ * disallowed in robots.txt: useful to open by hand when checking a layout, not
+ * something that should compete with the chart page it came from.
+ */
+/*
+ * @page margin is ZERO on purpose, and the sheet pads itself instead.
+ *
+ * Playwright's `page.pdf({ margin })` and a CSS `@page { margin }` both apply, so
+ * declaring 11 mm in both places silently produced 22 mm of margin, a printable
+ * box 62 pt shorter than the layout expected, and a second page on every chart.
+ * One source of truth: the margin is padding on `.sheet--print`, and the renderer
+ * asks for no margin at all.
+ */
+const page =
+  mode === 'print'
+    ? `@page { size: ${orientation === 'landscape' ? 'Letter landscape' : 'Letter portrait'}; margin: 0; }`
+    : '@page { size: 1000px 1500px; margin: 0; }';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <style set:html={page} is:inline />
+  </head>
+  <body
+    class={`sheet sheet--${mode}`}
+    data-orientation={orientation}
+    style={sheetHeightPt ? `--sheet-height: ${sheetHeightPt}pt;` : undefined}
+  >
+    <slot />
+
+    <style is:global>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #fff;
+        color: #000;
+        font-family: var(--font-body);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* A sheet is not a screenshot of the page: it has its own type scale, its
+         own margins and no navigation. What it keeps from the page is the data
+         and the source line — a sheet on a wall with no standard named on it is
+         exactly what already sits at the top of the search results. */
+      .sheet {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sheet--pin {
+        width: 1000px;
+        height: 1500px;
+        padding: 44px 40px 36px;
+      }
+
+      /*
+       * Height comes from the @page box in points, NOT from 100vh.
+       *
+       * Under print emulation `100vh` is the emulated viewport, which is taller
+       * than the printable area once @page margins are taken off — so a sheet
+       * sized that way overflows onto a second page while looking correct on
+       * screen. Every chart PDF came out two pages that way. The page box is the
+       * only honest unit here, so the template passes it in.
+       */
+      .sheet--print {
+        height: var(--sheet-height);
+        padding: 11mm;
+        overflow: hidden;
+      }
+
+      .sheet-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        border-bottom: 2px solid #000;
+        padding-bottom: 0.4rem;
+      }
+
+      .sheet-head h1 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      .sheet--print .sheet-head h1 {
+        font-size: 19pt;
+      }
+
+      .sheet--pin .sheet-head h1 {
+        font-size: 46px;
+      }
+
+      .sheet-head .sub {
+        font-family: var(--font-mono);
+        color: #333;
+      }
+
+      .sheet--print .sheet-head .sub {
+        font-size: 7.6pt;
+      }
+
+      .sheet--pin .sheet-head .sub {
+        font-size: 16px;
+      }
+
+      .sheet-body {
+        flex: 1;
+        display: flex;
+        gap: 18px;
+        align-items: stretch;
+        margin-top: 0.5rem;
+      }
+
+      .sheet-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+      }
+
+      th,
+      td {
+        border: 1px solid #999;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      thead th {
+        border-bottom: 1.6px solid #000;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 500;
+        color: #000;
+      }
+
+      td:first-child,
+      tbody th:first-child {
+        text-align: left;
+        font-weight: 700;
+      }
+
+      .sheet--print table {
+        font-size: 8.6pt;
+      }
+
+      .sheet--print th,
+      .sheet--print td {
+        padding: 1.4pt 4pt;
+      }
+
+      .sheet--print thead th {
+        font-size: 7pt;
+      }
+
+      .sheet--pin table {
+        font-size: 19px;
+      }
+
+      .sheet--pin th,
+      .sheet--pin td {
+        padding: 3.5px 8px;
+      }
+
+      .sheet--pin thead th {
+        font-size: 14px;
+      }
+
+      .sheet-foot {
+        margin-top: 0.6rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #000;
+        font-family: var(--font-mono);
+        color: #222;
+        display: grid;
+        gap: 2px;
+      }
+
+      .sheet--print .sheet-foot {
+        font-size: 6.8pt;
+      }
+
+      .sheet--pin .sheet-foot {
+        font-size: 13px;
+      }
+
+      .sheet-foot .domain {
+        font-weight: 700;
+        color: #000;
+      }
+
+      .conditions {
+        color: #333;
+      }
+    </style>
+  </body>
+</html>

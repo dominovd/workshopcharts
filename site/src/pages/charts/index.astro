@@ -1,0 +1,188 @@
+---
+import Base from '../../layouts/Base.astro';
+import ChartCard from '../../components/ChartCard.astro';
+import { trades, publishedCharts, pendingVerification, siteCounts } from '../../data/registry.ts';
+
+/**
+ * The browse page.
+ *
+ * This is the site's real index, and at this size it is faster than search: a
+ * reader scans thirty titles quicker than they can type what they want. Search
+ * becomes the primary route when the catalogue outgrows one screen per trade,
+ * not before.
+ *
+ * The held charts are listed here by name, with the reason. A reader who came
+ * looking for a torque chart is better served by "it exists, it is being checked,
+ * here is why it is not up" than by a blank where it should be — and it is the
+ * only honest way to explain why a site called Workshop Charts has three of them.
+ */
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'All charts',
+  url: new URL('/charts/', Astro.site).href,
+  inLanguage: 'en',
+  isPartOf: { '@type': 'WebSite', name: 'Workshop Charts', url: Astro.site?.href },
+  // Only published charts are listed as members. A held chart is named on the page
+  // as work in progress, which is not the same as being part of the collection.
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: publishedCharts.length,
+    itemListElement: publishedCharts.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.title,
+      url: new URL(`/${c.slug}/`, Astro.site).href,
+    })),
+  },
+};
+
+const grouped = trades.map((t) => ({
+  ...t,
+  published: publishedCharts.filter((c) => c.trade === t.id),
+  held: pendingVerification.filter((c) => c.trade === t.id),
+}));
+---
+
+<Base
+  title="All charts | Workshop Charts"
+  description="Every reference chart on the site, grouped by trade, plus the charts that are drafted and held back until each one has been checked against its standard."
+  ownSchema
+>
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} is:inline />
+
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">Catalogue</p>
+      <h1>All charts</h1>
+      <p class="lede">
+        {siteCounts.published} published, {siteCounts.inVerification} held pending a check.
+      </p>
+    </header>
+
+    {
+      grouped.map((t) => (
+        <section class="trade-section" id={t.id}>
+          <header>
+            <h2>{t.label}</h2>
+            <p>{t.blurb}</p>
+          </header>
+
+          {t.published.length > 0 && (
+            <div class="card-grid">
+              {t.published.map((chart) => (
+                <ChartCard chart={chart} preview={5} />
+              ))}
+            </div>
+          )}
+
+          {t.held.length > 0 && (
+            <div class="held">
+              <h3>In verification</h3>
+              <ul>
+                {t.held.map((c) => (
+                  <li>
+                    <strong>{c.title}</strong>
+                    <span class="held__sources mono">
+                      {c.sources.map((s) => s.standard).join(' · ')}
+                    </span>
+                    <p>{c.verification.note}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: var(--s-6) var(--s-7);
+  }
+
+  .page__head {
+    margin-bottom: var(--s-6);
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+  }
+
+  .trade-section {
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--rule);
+    margin-top: var(--s-6);
+    scroll-margin-top: var(--s-5);
+  }
+
+  .trade-section header {
+    margin-bottom: var(--s-4);
+  }
+
+  .trade-section h2 {
+    font-size: var(--step-3);
+  }
+
+  .trade-section header p {
+    margin-top: var(--s-2);
+    color: var(--ink-3);
+    font-size: var(--step--1);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: var(--s-4);
+  }
+
+  .held {
+    margin-top: var(--s-5);
+    padding: var(--s-4);
+    border: 1px dashed var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+
+  .held h3 {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .held ul {
+    list-style: none;
+    margin: var(--s-3) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .held strong {
+    font-size: var(--step-0);
+  }
+
+  .held__sources {
+    display: block;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+
+  .held p {
+    margin-top: var(--s-2);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 88ch;
+  }
+</style>

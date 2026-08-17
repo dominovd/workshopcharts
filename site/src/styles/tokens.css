@@ -1,0 +1,68 @@
+/*
+ * Design tokens.
+ *
+ * Constraints from DESIGN.md §7, in the order they bind:
+ *   1. The table must read black-and-white on a cheap printer. No halftone fills;
+ *      zebra striping is either very faint or replaced by a hairline rule.
+ *   2. Colour is accent only, and always doubled by shape, number or label.
+ *   3. Tabular figures everywhere in a table, or the columns do not line up and
+ *      the eye cannot scan them.
+ *   4. Type larger than feels right on screen — the sheet is read from a metre
+ *      away, off a wall.
+ *   5. Density above the rest of the portfolio. Fitting on one sheet is the value.
+ */
+
+:root {
+  /* Ink. Not pure black: full black on cream vibrates, and print gains nothing. */
+  --ink: #14140f;
+  --ink-2: #4a4a42;
+  --ink-3: #74746a;
+  --rule: #ddd9cc;
+  --rule-strong: #c3bfae;
+
+  /* Ground */
+  --paper: #ffffff;
+  --cream: #f4f1e6;
+  --cream-2: #ebe7d8;
+  --dark: #14140f;
+
+  /* Accent. One hue, used for state and emphasis, never to carry meaning alone. */
+  --lime: #9fd128;
+  --lime-ink: #4d6b00;
+  --lime-wash: #f0f7dc;
+  --warn: #f2c200;
+  --warn-wash: #fff8dc;
+
+  /* Type */
+  --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Roboto Mono Variable', 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --step--2: 0.72rem;
+  --step--1: 0.82rem;
+  --step-0: 0.95rem;
+  --step-1: 1.1rem;
+  --step-2: 1.4rem;
+  --step-3: 1.9rem;
+  --step-4: 2.6rem;
+  --step-5: clamp(2.6rem, 6.2vw, 4.4rem);
+
+  /* Space */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+
+  --shell: 1180px;
+  --radius: 3px;
+
+  /*
+   * Touch targets sized for the scenario in DESIGN.md §5: standing in a garage,
+   * phone in one hand, hands dirty. No hover-only affordances anywhere.
+   */
+  --tap: 44px;
+}

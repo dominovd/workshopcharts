@@ -1,0 +1,26 @@
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# Generated sheets are build artifacts: render:sheets recreates them.
+site/dist/
+site/public/sheets/
+
+# Scratch
+_to_delete/
+.DS_Store
+*.log
+*.tmp
+
+# Local env
+.env
+.env.*
+!.env.example
+# Append these to .gitignore if the GitHub repo is PUBLIC.
+# They are the niche research, not the site: keyword volumes, KD, CPC, the SERP
+# teardown and the domain shortlist. Publishing them hands the niche to anyone.
+PROJECT.md
+DESIGN.md
+workshop_pagemap.csv
+design/

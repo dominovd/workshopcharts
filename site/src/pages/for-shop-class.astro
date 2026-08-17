@@ -1,0 +1,183 @@
+---
+import Base from '../layouts/Base.astro';
+import { publishedCharts } from '../data/registry.ts';
+
+/**
+ * For shop class.
+ *
+ * Built on day one and linked from the body of the home page and from chart
+ * pages, not only from the footer — the mistake made on PrintChords, where the
+ * teacher-facing page went up with footer links only and had to be retrofitted.
+ *
+ * The audience here is narrower than a music teacher but the mechanism is the
+ * same: an instructor who prints a class set is the most likely source of a link
+ * from a .edu domain, which is the one link channel this project can realistically
+ * build (DESIGN.md §8).
+ */
+---
+
+<Base
+  title="Printable charts for shop class | Workshop Charts"
+  description="Free printable reference sheets for electrical, machining and fastener classes. Each sheet names the standard behind every column, so students see the source."
+>
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">For instructors</p>
+      <h1>Sheets for shop class.</h1>
+      <p class="lede">
+        Free, printable, no sign-up. Every column names its standard, so the sheet
+        teaches sourcing as well as sizes.
+      </p>
+    </header>
+
+    <section class="why">
+      <div>
+        <h2>Why these work as handouts</h2>
+        <p>
+          Each sheet prints in the orientation its table needs, uses tabular figures
+          so columns line up, and carries no halftone fills, so it stays legible from a
+          classroom photocopier and from a wall at a few metres.
+        </p>
+      </div>
+      <div>
+        <h2>Where the numbers come from</h2>
+        <p>
+          The source block prints with the sheet. A student can see that a diameter
+          came from one document and a resistance figure from another, which is a
+          harder lesson to teach from a table with no citation at all.
+        </p>
+      </div>
+      <div>
+        <h2>What is deliberately missing</h2>
+        <p>
+          There is no ampacity column on the wire gauge sheet. Current capacity
+          depends on the installation, so it belongs on a page that can carry the
+          code conditions with it. Worth saying out loud to a class that will meet
+          plenty of tables that do not make that distinction.
+        </p>
+      </div>
+    </section>
+
+    <section class="sheets">
+      <h2>Sheets ready to print</h2>
+      <ul>
+        {
+          publishedCharts.map((c) => (
+            <li>
+              <a href={`/${c.slug}/`}>
+                <strong>{c.title}</strong>
+                <span>{c.coverageNote}</span>
+                <span class="mono">Prints {c.printOrientation}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="ask">
+      <h2>Need a sheet that is not here?</h2>
+      <p>
+        If you teach a unit that needs a table we have not published, say which
+        standard it should come from and it goes to the front of the verification
+        queue. A request with a standard attached is worth more to this project than
+        a traffic estimate.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: var(--s-6) var(--s-7);
+    display: grid;
+    gap: var(--s-7);
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+    max-width: 48ch;
+  }
+
+  .why {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--s-5);
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--rule);
+  }
+
+  .why h2 {
+    font-size: var(--step-0);
+  }
+
+  .why p {
+    margin-top: var(--s-2);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .sheets h2,
+  .ask h2 {
+    font-size: var(--step-3);
+    margin-bottom: var(--s-4);
+  }
+
+  .sheets ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--s-4);
+  }
+
+  .sheets a {
+    display: grid;
+    gap: var(--s-2);
+    padding: var(--s-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    text-decoration: none;
+    background: var(--paper);
+    height: 100%;
+  }
+
+  .sheets a:hover {
+    border-color: var(--ink);
+  }
+
+  .sheets strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+
+  .sheets span {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .sheets .mono {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+
+  .ask {
+    padding: var(--s-6);
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+
+  .ask p {
+    max-width: 68ch;
+    color: var(--ink-2);
+  }
+</style>

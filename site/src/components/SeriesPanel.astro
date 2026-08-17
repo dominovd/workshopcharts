@@ -1,0 +1,126 @@
+---
+import type { Chart } from '../data/schema.ts';
+import { allCharts, publishedCharts } from '../data/registry.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+/**
+ * All members of a series, with each one's status.
+ *
+ * `drill bit size chart` is one phrase covering four different series. A page that
+ * ranks for it and shows only the fractional sizes over-promises; a page that
+ * narrows its H1 to "fractional" stops answering the phrase people type. This is
+ * the third option: keep the head phrase, and let the page state all four members
+ * and which are up. The reader can tell absence from omission, which is the same
+ * standard the row sets are held to — and the panel is generated from the registry,
+ * so it cannot claim a series that does not exist as data.
+ */
+const members = chart.series
+  ? allCharts.filter((c) => c.series === chart.series)
+  : [];
+const published = new Set(publishedCharts.map((c) => c.slug));
+---
+
+{
+  members.length > 1 && (
+    <section class="series no-print" aria-labelledby="series-heading">
+      <h2 id="series-heading">The four drill size series</h2>
+      <p class="intro">
+        "Drill bit size" covers four separate series. Only the fractional series is
+        arithmetic. The other three are published tables, and they go up when each
+        has been read against the standard.
+      </p>
+
+      <ul>
+        {members.map((m) => {
+          const isThis = m.slug === chart.slug;
+          const live = published.has(m.slug);
+          return (
+            <li data-state={isThis ? 'current' : live ? 'live' : 'held'}>
+              <span class="label">{m.seriesLabel ?? m.title}</span>
+              {isThis ? (
+                <span class="state">On this page</span>
+              ) : live ? (
+                <a class="state" href={`/${m.slug}/`}>
+                  View chart →
+                </a>
+              ) : (
+                <span class="state">In verification</span>
+              )}
+              <span class="src mono">{m.sources.map((s) => s.standard).join(' · ')}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .series {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--s-5);
+  }
+
+  h2 {
+    font-size: var(--step-2);
+  }
+
+  .intro {
+    margin-top: var(--s-2);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 66ch;
+  }
+
+  ul {
+    list-style: none;
+    margin: var(--s-4) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--s-3);
+  }
+
+  li {
+    display: grid;
+    gap: var(--s-1);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+  }
+
+  li[data-state='current'] {
+    border-color: var(--lime-ink);
+    background: var(--lime-wash);
+  }
+
+  li[data-state='held'] {
+    border-style: dashed;
+    background: var(--cream);
+  }
+
+  .label {
+    font-weight: 700;
+    font-size: var(--step-0);
+  }
+
+  .state {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  li[data-state='held'] .state {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+
+  .src {
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+</style>

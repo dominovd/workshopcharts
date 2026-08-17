@@ -1,0 +1,196 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Sheet from '../../../layouts/Sheet.astro';
+import { publishedCharts } from '../../../data/registry.ts';
+import type { Chart } from '../../../data/schema.ts';
+import { visibleColumns, headerGroups, formatCell, sourceMap } from '../../../lib/view.ts';
+
+/**
+ * Source document for `dist/sheets/<slug>.png` — the vertical 1000×1500 asset.
+ *
+ * This is a re-typesetting, not a screenshot. The rows are dealt into N blocks
+ * side by side so the sheet fills a 2:3 canvas at a type size that survives a
+ * thumbnail, and the columns are the subset `chart.pinSheet.columns` names.
+ * Which columns were dropped is printed on the image, because an image that
+ * quietly shows less than the page is the same defect as a table with a silent
+ * gap in its series.
+ */
+export const getStaticPaths = (() =>
+  publishedCharts.map((chart) => ({ params: { slug: chart.slug }, props: { chart } }))) satisfies GetStaticPaths;
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+const all = visibleColumns(chart);
+const columns = chart.pinSheet.columns.map((key) => all.find((c) => c.key === key)!);
+const groups = headerGroups(columns);
+const hasGroupRow = columns.some((c) => c.group);
+
+const blocks = chart.pinSheet.rowColumns;
+const perBlock = Math.ceil(chart.rows.length / blocks);
+const rowBlocks = Array.from({ length: blocks }, (_, i) =>
+  chart.rows.slice(i * perBlock, (i + 1) * perBlock),
+);
+
+const sources = sourceMap(chart)
+  .filter((r) => r.columns.some((c) => chart.pinSheet.columns.includes(c.key)))
+  .map((r) => r.source.standard);
+
+/**
+ * Type size derived from the row count so the sheet fills the canvas.
+ *
+ * The rule from DESIGN.md §3: the sheet must use the full height. A fixed font
+ * size cannot satisfy it, because 22 rows and 32 rows need different row heights
+ * to reach the same bottom edge — the first pass at this left 40 % of the canvas
+ * empty, which is the same defect that had to be fixed on the guitar charts and
+ * is visible at thumbnail size in a feed.
+ *
+ * So the row height is what is left after the furniture, divided by the rows, and
+ * the type is sized to it. Bigger sheet, fewer rows, larger figures — the
+ * relationship the reader actually wants.
+ */
+const CANVAS_H = 1500;
+const CANVAS_W = 1000;
+const PAD_X = 40 * 2;
+const FURNITURE = 44 + 36 + 78 + 26 + 74; // padding, heading, caption, footer
+const headerRows = hasGroupRow ? 2 : 1;
+
+const rowHeight = (CANVAS_H - FURNITURE) / (perBlock + headerRows);
+const verticalFit = rowHeight * 0.5;
+
+/**
+ * The horizontal budget, which the first version of this did not have.
+ *
+ * Type was sized from the vertical space alone, so a table with one column too
+ * many simply ran off the right edge of the canvas and the build passed: the fill
+ * check measured height. A five-column wire table cropped mid-word at "CIRCUL"
+ * and lost two columns for half its rows, on the asset that goes to the image pack
+ * for the largest cluster in the project.
+ *
+ * So the width is budgeted from the real content: the longest formatted cell in
+ * each column, in monospace, where a glyph is about 0.6 em. Whichever budget is
+ * tighter sets the type size, and `render-sheets.mjs` measures the result as well,
+ * because an estimate is not a guarantee.
+ */
+const BLOCK_GAP = 18;
+const CELL_PAD_X = 9 * 2 + 1;
+const GLYPH = 0.6;
+
+const widestPerColumn = columns.map((c) =>
+  Math.max(
+    (c.group ?? '').length,
+    c.label.length,
+    ...chart.rows.map((r) => formatCell(r.cells[c.key], c.precision).length),
+  ),
+);
+const glyphsAcross = widestPerColumn.reduce((n, w) => n + w, 0) * blocks;
+const cellsAcross = columns.length * blocks;
+const availableWidth = CANVAS_W - PAD_X - BLOCK_GAP * (blocks - 1) - CELL_PAD_X * cellsAcross;
+const horizontalFit = availableWidth / (glyphsAcross * GLYPH);
+
+/**
+ * Below this the figures stop being readable at thumbnail size, which is the only
+ * size that matters for the channel this asset exists for. Rather than ship type
+ * nobody can read, the build stops and says which lever to pull.
+ */
+const MIN_LEGIBLE = 15;
+
+const fontSize = Math.min(30, verticalFit, horizontalFit);
+const cellPad = Math.max(2, Math.min(rowHeight * 0.14, fontSize * 0.3));
+
+if (fontSize < MIN_LEGIBLE) {
+  throw new Error(
+    `pinSheet for "${chart.slug}" does not fit: ${columns.length} columns × ` +
+      `${blocks} blocks needs ${fontSize.toFixed(1)}px type to fit 1000×1500, below the ` +
+      `${MIN_LEGIBLE}px floor. Drop a column from pinSheet.columns or reduce ` +
+      `pinSheet.rowColumns.`,
+  );
+}
+---
+
+<Sheet title={chart.title} mode="pin">
+  <header class="sheet-head">
+    <h1>{chart.title}</h1>
+  </header>
+  <p class="pin-sub">{chart.coverageNote}</p>
+
+  <div
+    class="sheet-body"
+    style={`--pin-font: ${fontSize.toFixed(2)}px; --pin-pad: ${cellPad.toFixed(2)}px; --pin-row: ${rowHeight.toFixed(2)}px;`}
+  >
+    {
+      rowBlocks.map((rows) => (
+        <div class="sheet-col">
+          <table>
+            <thead>
+              <tr>
+                {groups.map((g) => (
+                  <th colspan={g.span}>{g.label}</th>
+                ))}
+              </tr>
+              {hasGroupRow && (
+                <tr>
+                  {columns.map((c) => (
+                    <th>{c.group ?? ''}</th>
+                  ))}
+                </tr>
+              )}
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  {columns.map((c, i) =>
+                    i === 0 ? (
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision)}</th>
+                    ) : (
+                      <td>{formatCell(row.cells[c.key], c.precision)}</td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))
+    }
+  </div>
+
+  <footer class="sheet-foot">
+    <span>Sources: {sources.join(' · ')} · full source map on the page</span>
+    {chart.pinSheet.note && <span class="conditions">{chart.pinSheet.note}</span>}
+    <span class="domain">workshopcharts.com/{chart.slug}/</span>
+  </footer>
+</Sheet>
+
+<style is:global>
+  .pin-sub {
+    margin: 10px 0 0;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: #333;
+  }
+
+  .sheet--pin .sheet-body table {
+    height: 100%;
+    width: 100%;
+    table-layout: auto;
+    font-size: var(--pin-font);
+  }
+
+  .sheet--pin .sheet-body .sheet-col {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sheet--pin .sheet-body th,
+  .sheet--pin .sheet-body td {
+    padding: var(--pin-pad) 9px;
+    height: var(--pin-row);
+  }
+
+  .sheet--pin .sheet-body thead th {
+    font-size: calc(var(--pin-font) * 0.66);
+  }
+</style>

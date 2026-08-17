@@ -1,0 +1,220 @@
+---
+import type { Chart } from '../data/schema.ts';
+import { visibleColumns, headerGroups, formatCell } from '../lib/view.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+const columns = visibleColumns(chart);
+const hasGroupRow = columns.some((c) => c.group);
+
+/**
+ * Group header cells, one set per unit-toggle state.
+ *
+ * A `colspan` cannot be changed by CSS, so a `DIAMETER` header spanning an inch
+ * and a millimetre column would stay two cells wide after one of them is hidden
+ * and knock the whole header out of line. Instead each mixed group emits all three
+ * versions of itself — full span, imperial only, metric only — and the toggle
+ * shows one. The DOM stays complete, which is the same requirement that keeps the
+ * columns themselves in the markup.
+ */
+const groups = headerGroups(columns).flatMap((g) => {
+  const cols = g.keys.map((k) => columns.find((c) => c.key === k)!);
+  const systems = new Set(cols.map((c) => c.system));
+
+  // A group whose columns all share one system needs no variants: it hides or
+  // stays with its columns via `data-system`, and carries NO `data-units-scope`
+  // so the swap rules never touch it.
+  if (systems.size === 1) {
+    const only = [...systems][0]!;
+    return [
+      {
+        label: g.label,
+        span: g.span,
+        system: only === 'both' ? undefined : only,
+        scope: undefined,
+        variant: cols[0]!.variant,
+      },
+    ];
+  }
+
+  const imperial = cols.filter((c) => c.system !== 'metric').length;
+  const metric = cols.filter((c) => c.system !== 'imperial').length;
+  return [
+    { label: g.label, span: g.span, system: undefined, scope: 'both' as const, variant: cols[0]!.variant },
+    { label: g.label, span: imperial, system: undefined, scope: 'imperial' as const, variant: cols[0]!.variant },
+    { label: g.label, span: metric, system: undefined, scope: 'metric' as const, variant: cols[0]!.variant },
+  ];
+});
+---
+
+<figure class="chart-figure">
+  <figcaption class="coverage-note">
+    <strong>{chart.title.replace(/ Chart$/, '')}</strong>
+    <span>{chart.coverageNote}</span>
+    {
+      chart.completeness === 'selected' && (
+        <span class="chip chip--selected">Selected sizes, not the full series</span>
+      )
+    }
+  </figcaption>
+
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          {
+            groups.map((g) => (
+              <th
+                colspan={g.span}
+                scope="col"
+                data-system={g.system}
+                data-units-scope={g.scope}
+                data-variant-axis={g.variant?.axis}
+                data-variant-option={g.variant?.option}
+              >
+                {g.label}
+              </th>
+            ))
+          }
+        </tr>
+        {
+          hasGroupRow && (
+            <tr>
+              {columns.map((c) => (
+                <th
+                  scope="col"
+                  class="unit-row"
+                  data-system={c.system}
+                  data-variant-axis={c.variant?.axis}
+                  data-variant-option={c.variant?.option}
+                >
+                  {c.group ?? ''}
+                </th>
+              ))}
+            </tr>
+          )
+        }
+      </thead>
+      <tbody>
+        {
+          chart.rows.map((row) => (
+            <tr
+              data-row-id={row.id}
+              data-search={columns
+                .map((c) => formatCell(row.cells[c.key], c.precision))
+                .join(' ')
+                .toLowerCase()}
+            >
+              {columns.map((c, i) =>
+                i === 0 ? (
+                  <th
+                    scope="row"
+                    data-system={c.system}
+                    data-variant-axis={c.variant?.axis}
+                    data-variant-option={c.variant?.option}
+                  >
+                    {formatCell(row.cells[c.key], c.precision)}
+                  </th>
+                ) : (
+                  <td
+                    data-system={c.system}
+                    data-variant-axis={c.variant?.axis}
+                    data-variant-option={c.variant?.option}
+                  >
+                    {formatCell(row.cells[c.key], c.precision)}
+                  </td>
+                ),
+              )}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="no-match no-print" hidden>
+    No size matches that. Clear the filter to see the full table.
+  </p>
+</figure>
+
+<style>
+  .chart-figure {
+    margin: 0;
+  }
+
+  .coverage-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-2) var(--s-3);
+    margin-bottom: var(--s-3);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .coverage-note strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--ink);
+  }
+
+  .chip--selected {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--warn-wash);
+    border: 1px solid var(--warn);
+    border-radius: var(--radius);
+    padding: 0.1rem 0.4rem;
+  }
+
+  /* Horizontal scroll inside the table is a poor pattern on a phone (§5), so the
+     mobile route is the filter above the table, not this. Kept only as the
+     fallback for wide tables on narrow desktop windows. */
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+
+  .data-table {
+    border: 0;
+  }
+
+  .unit-row {
+    font-size: var(--step--2);
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .no-match {
+    margin-top: var(--s-3);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  tbody tr[hidden] {
+    display: none;
+  }
+
+  /* Only the full-span group header shows until the units toggle narrows the
+     table. Scoped variants stay in the DOM and swap in. */
+  th[data-units-scope='imperial'],
+  th[data-units-scope='metric'] {
+    display: none;
+  }
+
+  :global(.chart-view[data-units='imperial']) th[data-units-scope='both'],
+  :global(.chart-view[data-units='metric']) th[data-units-scope='both'] {
+    display: none;
+  }
+
+  :global(.chart-view[data-units='imperial']) th[data-units-scope='imperial'],
+  :global(.chart-view[data-units='metric']) th[data-units-scope='metric'] {
+    display: table-cell;
+  }
+</style>

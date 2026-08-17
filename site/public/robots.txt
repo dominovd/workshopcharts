@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Source documents for the printable PDF and the vertical PNG. Rendered at build
+# time and kept out of the index so they do not compete with the chart page.
+Disallow: /sheet/
+
+# Generated files are welcome — the PNG is the point.
+Allow: /sheets/
+
+Sitemap: https://workshopcharts.com/sitemap.xml

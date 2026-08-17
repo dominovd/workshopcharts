@@ -1,0 +1,54 @@
+---
+import type { Chart } from '../data/schema.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+const orientation = chart.printOrientation;
+---
+
+<div class="artifact-bar no-print">
+  <button class="btn btn--solid" type="button" data-print>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M4.5 6V2.5h7V6" stroke="currentColor" stroke-width="1.4"></path>
+      <rect x="1.8" y="6" width="12.4" height="5.4" stroke="currentColor" stroke-width="1.4"></rect>
+      <path d="M4.5 9.5h7v4h-7z" stroke="currentColor" stroke-width="1.4"></path>
+    </svg>
+    Print sheet
+  </button>
+
+  <a class="btn" href={`/sheets/${chart.slug}.pdf`} download>Download PDF</a>
+  <a class="btn" href={`/sheets/${chart.slug}.png`} download>Download PNG</a>
+
+  <p class="orientation mono">
+    {/* Orientation is read from the chart data, not set globally: a three-column
+        drill chart wants portrait and a six-column wire table does not. */}
+    Sheet orientation from table data: <strong>{orientation}</strong>
+  </p>
+</div>
+
+<style>
+  .artifact-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+  }
+
+  .orientation {
+    margin-left: auto;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .orientation strong {
+    color: var(--ink);
+  }
+</style>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>

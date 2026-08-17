@@ -1,0 +1,324 @@
+---
+import Base from '../layouts/Base.astro';
+import { siteCounts, publishedCharts, pendingVerification, allCharts } from '../data/registry.ts';
+import { standardsIndex } from '../lib/view.ts';
+
+/**
+ * How we verify.
+ *
+ * The best E-E-A-T signal available to a reference site with no named expert
+ * author is a process a reader can inspect, so this page describes the actual
+ * mechanism including its limits — particularly the limit that a machine check
+ * cannot detect a table that is internally perfect and wrong.
+ */
+const derived = publishedCharts.filter((c) => c.verification.status === 'derived');
+const sighted = publishedCharts.filter((c) => c.verification.status === 'verified');
+const publishedSlugs = new Set(publishedCharts.map((c) => c.slug));
+const standards = standardsIndex(allCharts, publishedSlugs);
+---
+
+<Base
+  title="How we verify | Workshop Charts"
+  description="The process behind every chart: sources mapped per column, machine checks on form, a human sight-check against the standard, and what neither of those can catch."
+>
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">Method</p>
+      <h1>How we verify</h1>
+      <p class="lede">
+        A wrong torque figure is not a typo. Here is the process, and where it stops.
+      </p>
+    </header>
+
+    <section class="prose">
+      <h2>Two ways a chart can be right</h2>
+      <p>
+        Some tables are definitions. American Wire Gauge is a geometric series
+        anchored at two diameters, and a fractional drill size is the fraction, so
+        every figure can be recomputed from first principles. For those, our build
+        recomputes each value and fails if any one drifts. {derived.length} of the
+        charts here are published on that basis.
+      </p>
+      <p>
+        Most tables are not definitions. Bolt torque, thread pitch, O-ring
+        dimensions and NEC ampacity are published documents that have to be read
+        and transcribed. Those are published only after a person has read the
+        standard back against the table, line by line, and signed the date.
+        {sighted.length} charts are published on that basis today, and {
+          siteCounts.inVerification
+        } are drafted and held waiting for it.
+      </p>
+
+      <h2>Sources are mapped to columns, not to tables</h2>
+      <p>
+        A wire table takes its diameters from one document and its resistance from
+        another. One citation under both would be an overstatement about one of
+        them, so each column names its own source, and the source block on every
+        page lists which columns each document covers. The build fails if a column
+        has no source, or names one the page does not define, which is the only
+        reliable defence against a column being added later without one.
+      </p>
+
+      <h2>What the machine checks catch</h2>
+      <ul>
+        <li>A column with no source behind it.</li>
+        <li>A citation nobody uses, which reads as coverage the table does not have.</li>
+        <li>A value that breaks a monotonic run, such as torque falling as diameter grows.</li>
+        <li>Inch and millimetre columns that disagree.</li>
+        <li>A gap in a series, and a control on the page with no data behind it.</li>
+      </ul>
+
+      <h2>What they cannot catch, and why it matters</h2>
+      <p>
+        A draft of our O-ring chart converted inches to millimetres perfectly on
+        every row and still disagreed with AS568 on every row: the dash numbers had
+        shifted by one, so each size carried the dimensions of its neighbour. Every
+        check we had passed. Consistency is not correctness, and no amount of
+        automation reaches this, which is why a transcribed table waits for a
+        person rather than for a test.
+      </p>
+
+      <h2 id="standards">Every standard we cite</h2>
+      <p>
+        {standards.length} published documents, with the charts that draw on each one.
+        The link on every designation goes to the publisher's own page, which is the
+        page that stays correct about which revision is current. Where a source has no
+        publisher page, the row says so rather than leaving a gap.
+      </p>
+
+      <table class="standards">
+        <thead>
+          <tr>
+            <th scope="col">Standard</th>
+            <th scope="col">Publisher</th>
+            <th scope="col">Used by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            standards.map((s) => (
+              <tr>
+                <td>
+                  {s.source.url ? (
+                    <a class="mono" href={s.source.url} rel="noopener nofollow" target="_blank">
+                      {s.source.standard}
+                      {s.source.edition ? ` (${s.source.edition})` : ''} ↗
+                    </a>
+                  ) : (
+                    <span class="mono">
+                      {s.source.standard}
+                      {s.source.edition ? ` (${s.source.edition})` : ''}
+                    </span>
+                  )}
+                  {s.source.urlNote && <span class="no-link">No publisher page.</span>}
+                </td>
+                <td>{s.source.publisher ?? 'n/a'}</td>
+                <td>
+                  <ul class="uses">
+                    {s.charts.map((c) =>
+                      c.published ? (
+                        <li>
+                          <a href={`/${c.slug}/`}>{c.title}</a>
+                        </li>
+                      ) : (
+                        <li class="pending">{c.title} (in verification)</li>
+                      ),
+                    )}
+                  </ul>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+
+      <p class="note">
+        Standards are copyrighted documents, so we cannot host them. Most publishers
+        sell access; NFPA offers free read-only access to the National Electrical Code
+        through its own site. We link, quote the clause we relied on, and record the
+        date we read it.
+      </p>
+
+      <h2>Dates</h2>
+      <p>
+        Every chart shows when it was last checked. None shows when it will be
+        checked next: a future date is accurate only until the day it arrives unmet,
+        and then it says the opposite of what it was put there for. The date of the
+        last check is a fact and it is the one we publish.
+      </p>
+
+      <h2>When the manufacturer disagrees with us</h2>
+      <p>
+        Follow the manufacturer. A reference sheet gives you the general figure for
+        a class of fastener or conductor; the instructions that came with the part
+        account for the joint, the material and the assembly. Where they conflict,
+        theirs governs.
+      </p>
+    </section>
+
+    <aside class="held-list">
+      <h2>Currently held</h2>
+      <ul>
+        {
+          pendingVerification.map((c) => (
+            <li>
+              <strong>{c.title}</strong>
+              <span class="mono">{c.sources.map((s) => s.standard).join(' · ')}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    gap: var(--s-7);
+    padding-block: var(--s-6) var(--s-7);
+    align-items: start;
+  }
+
+  .page__head {
+    grid-column: 1 / -1;
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+    max-width: 44ch;
+  }
+
+  .prose h2 {
+    font-size: var(--step-2);
+    margin-top: var(--s-6);
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose p,
+  .prose ul {
+    margin-top: var(--s-3);
+    max-width: 70ch;
+    color: var(--ink-2);
+  }
+
+  .prose > .standards {
+    max-width: 100%;
+  }
+
+  .prose ul {
+    padding-left: 1.2rem;
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  .standards {
+    width: 100%;
+    max-width: none;
+    margin-top: var(--s-4);
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .standards th,
+  .standards td {
+    border: 1px solid var(--rule);
+    padding: var(--s-3);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .standards thead th {
+    background: var(--cream);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .standards a {
+    font-weight: 600;
+    text-decoration-color: var(--lime-ink);
+  }
+
+  .no-link {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  .uses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-1);
+  }
+
+  .uses .pending {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+
+  .note {
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  .held-list {
+    position: sticky;
+    top: var(--s-4);
+    padding: var(--s-4);
+    border: 1px dashed var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+
+  .held-list h2 {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .held-list ul {
+    list-style: none;
+    margin: var(--s-3) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .held-list strong {
+    display: block;
+    font-size: var(--step--1);
+  }
+
+  .held-list span {
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 900px) {
+    .page {
+      grid-template-columns: 1fr;
+      gap: var(--s-6);
+    }
+    .held-list {
+      position: static;
+    }
+  }
+</style>

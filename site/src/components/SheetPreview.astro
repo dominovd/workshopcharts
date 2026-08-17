@@ -1,0 +1,198 @@
+---
+import type { Chart } from '../data/schema.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+/**
+ * The two sheets, as real images.
+ *
+ * The site had no `<img>` anywhere on the first pass, on a cluster measuring
+ * 96–100 % image presence in the results. That is not a missing decoration, it is
+ * a missing channel — and DESIGN.md §2 item 8 asks specifically for the vertical
+ * PNG to exist as an indexable `<img>` with meaningful alt text, not as a CSS
+ * background or a canvas.
+ *
+ * Both files are produced at build time by `scripts/render-sheets.mjs`, which
+ * fails the build if either is missing. The `<img>` here and the `og:image` on the
+ * page point at the same generated file.
+ */
+const pin = `/sheets/${chart.slug}.png`;
+const pdf = `/sheets/${chart.slug}.pdf`;
+/** A picture of the printable sheet itself, in its own orientation. */
+const printPreview = `/sheets/${chart.slug}-print.png`;
+const wide = chart.printOrientation === 'landscape';
+---
+
+<section class="sheets no-print" aria-labelledby="sheets-heading">
+  <header>
+    <h2 id="sheets-heading">One data set. Two purpose-built sheets.</h2>
+    <p>
+      The printable sheet and the vertical image use different layouts, so neither
+      one sacrifices readability to the other.
+    </p>
+  </header>
+
+  <div class="sheets__grid">
+    <figure class="sheet-card">
+      <figcaption>
+        <span class="mono kind">Print / PDF</span>
+        <span class="mono spec">
+          US Letter · {chart.printOrientation} · one page
+        </span>
+      </figcaption>
+      <a class="thumb" href={pdf} download>
+        <img
+          src={printPreview}
+          width={wide ? 1100 : 850}
+          height={wide ? 850 : 1100}
+          loading="lazy"
+          decoding="async"
+          alt={`Printable ${chart.title.toLowerCase()} sheet, ${chart.printOrientation} on US Letter, with the source line for each column along the bottom.`}
+        />
+      </a>
+      <a class="btn btn--quiet" href={pdf} download>Download PDF</a>
+    </figure>
+
+    <p class="reflow mono" aria-hidden="true">
+      Rows reflow<br />into stacked<br />blocks →
+    </p>
+
+    <figure class="sheet-card sheet-card--pin">
+      <figcaption>
+        <span class="mono kind">Vertical PNG</span>
+        <span class="mono spec">1000 × 1500 px</span>
+      </figcaption>
+      <a class="thumb" href={pin} download>
+        <img
+          src={pin}
+          width="1000"
+          height="1500"
+          loading="lazy"
+          decoding="async"
+          alt={chart.imageAlt}
+        />
+      </a>
+      <a class="btn btn--quiet" href={pin} download>Download PNG</a>
+    </figure>
+  </div>
+
+  <p class="note">
+    {chart.pinSheet.note
+      ? chart.pinSheet.note
+      : 'Both sheets carry every column that is on the page.'}
+  </p>
+</section>
+
+<style>
+  .sheets {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--s-5);
+  }
+
+  h2 {
+    font-size: var(--step-3);
+  }
+
+  header p {
+    margin-top: var(--s-2);
+    color: var(--ink-2);
+    font-size: var(--step--1);
+    max-width: 62ch;
+  }
+
+  .sheets__grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--s-4);
+    align-items: start;
+    margin-top: var(--s-5);
+  }
+
+  .sheet-card {
+    margin: 0;
+    display: grid;
+    gap: var(--s-3);
+    justify-items: start;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: var(--s-3);
+    background: var(--cream);
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+    align-items: baseline;
+    width: 100%;
+  }
+
+  .kind {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  .spec {
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #fff;
+    border: 1px solid var(--rule-strong);
+  }
+
+  /* Scoped to `.thumb`, so it cannot catch the download button — which is also an
+     anchor, and which inherited an aspect-ratio box and grew into an empty panel. */
+  a.thumb {
+    display: block;
+    width: 100%;
+  }
+
+  /* The vertical sheet is shown top-cropped: it is 2:3 and would otherwise dwarf
+     the card. The print sheet is shown whole, in its own orientation. */
+  .sheet-card--pin a.thumb {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+  }
+
+  .sheet-card--pin a.thumb img {
+    border: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .reflow {
+    align-self: center;
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    text-align: center;
+  }
+
+  .note {
+    margin-top: var(--s-4);
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 820px) {
+    .sheets__grid {
+      grid-template-columns: 1fr;
+    }
+    .reflow {
+      display: none;
+    }
+  }
+</style>

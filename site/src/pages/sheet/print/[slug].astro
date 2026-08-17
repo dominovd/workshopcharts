@@ -1,0 +1,139 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Sheet from '../../../layouts/Sheet.astro';
+import { publishedCharts } from '../../../data/registry.ts';
+import type { Chart } from '../../../data/schema.ts';
+import { visibleColumns, headerGroups, formatCell, sourceMap } from '../../../lib/view.ts';
+
+/** Source document for `dist/sheets/<slug>.pdf`. */
+export const getStaticPaths = (() =>
+  publishedCharts.map((chart) => ({ params: { slug: chart.slug }, props: { chart } }))) satisfies GetStaticPaths;
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+const columns = visibleColumns(chart);
+const groups = headerGroups(columns);
+const hasGroupRow = columns.some((c) => c.group);
+const sources = sourceMap(chart).filter((r) => r.columns.length > 0);
+const conditions = [
+  ...chart.conditions,
+  ...columns.flatMap((c) => c.conditions ?? []),
+].filter((v, i, a) => a.indexOf(v) === i);
+
+/**
+ * One page, filled.
+ *
+ * Rows are dealt into blocks so the sheet fits a single sheet of Letter, and the
+ * type is then sized to whatever height is left. Both halves of that matter: a
+ * two-page wall chart is not a wall chart, and a one-page chart with a third of
+ * the paper blank wastes the size the figures could have had.
+ */
+const blocks = chart.printSheet.rowColumns;
+const perBlock = Math.ceil(chart.rows.length / blocks);
+const rowBlocks = Array.from({ length: blocks }, (_, i) =>
+  chart.rows.slice(i * perBlock, (i + 1) * perBlock),
+);
+
+const headerRows = hasGroupRow ? 2 : 1;
+// Full Letter page box in points. `.sheet--print` pads 11 mm (31.18 pt) on each
+// side, so the content box is this minus 62.4 pt, less a 4 pt guard against
+// rounding and less the heading and footer furniture.
+const pageHeight = chart.printOrientation === 'landscape' ? 612 : 792;
+const available = pageHeight - 62.4 - 4 - 74;
+const rowHeight = available / (perBlock + headerRows);
+const fontSize = Math.min(11, Math.max(5.6, rowHeight * 0.62));
+const cellPad = Math.max(0.6, rowHeight * 0.12);
+---
+
+<Sheet
+  title={chart.title}
+  mode="print"
+  orientation={chart.printOrientation}
+  sheetHeightPt={pageHeight}
+>
+  <header class="sheet-head">
+    <h1>{chart.title}</h1>
+    <span class="sub">{chart.coverageNote}</span>
+  </header>
+
+  <div
+    class="sheet-body"
+    style={`--pr-font: ${fontSize.toFixed(2)}pt; --pr-pad: ${cellPad.toFixed(2)}pt; --pr-row: ${rowHeight.toFixed(2)}pt;`}
+  >
+    {
+      rowBlocks.map((rows) => (
+        <div class="sheet-col">
+          <table>
+            <thead>
+              <tr>
+                {groups.map((g) => (
+                  <th colspan={g.span}>{g.label}</th>
+                ))}
+              </tr>
+              {hasGroupRow && (
+                <tr>
+                  {columns.map((c) => (
+                    <th>{c.group ?? ''}</th>
+                  ))}
+                </tr>
+              )}
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  {columns.map((c, i) =>
+                    i === 0 ? (
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision)}</th>
+                    ) : (
+                      <td>{formatCell(row.cells[c.key], c.precision)}</td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))
+    }
+  </div>
+
+  <footer class="sheet-foot">
+    {
+      /* The source line is on the sheet, per column, exactly as on the page. This
+         is the difference between our printout and the university course PDFs
+         currently ranking for these queries. */
+      sources.map((r) => (
+        <span>
+          {r.columns.map((c) => (c.group ? `${c.label} ${c.group}` : c.label)).join(', ')} →{' '}
+          {r.source.standard}
+          {r.source.definitional ? ' (definition)' : ''}
+        </span>
+      ))
+    }
+    {conditions.length > 0 && <span class="conditions">{conditions.join(' · ')}</span>}
+    <span>
+      <span class="domain">workshopcharts.com/{chart.slug}/</span> · last checked{' '}
+      {chart.verification.verifiedOn} · manufacturer figures for a specific assembly govern
+    </span>
+  </footer>
+</Sheet>
+
+<style is:global>
+  .sheet--print .sheet-body table {
+    height: 100%;
+    font-size: var(--pr-font);
+  }
+
+  .sheet--print .sheet-body th,
+  .sheet--print .sheet-body td {
+    padding: var(--pr-pad) 4pt;
+    height: var(--pr-row);
+  }
+
+  .sheet--print .sheet-body thead th {
+    font-size: calc(var(--pr-font) * 0.72);
+  }
+</style>

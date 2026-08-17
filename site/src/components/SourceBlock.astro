@@ -1,0 +1,311 @@
+---
+import type { Chart } from '../data/schema.ts';
+import { sourceMap, heldColumns, conditionChips } from '../lib/view.ts';
+
+interface Props {
+  chart: Chart;
+}
+const { chart } = Astro.props;
+
+const rows = sourceMap(chart);
+const held = heldColumns(chart);
+const chips = conditionChips(chart);
+const v = chart.verification;
+---
+
+<section class="source-block" aria-labelledby="sources-heading">
+  <h2 id="sources-heading">Sources mapped to columns</h2>
+
+  <p class="intro">
+    One line per source, listing exactly which columns it covers. A column cannot
+    appear in the table without appearing here, because the build fails on it.
+  </p>
+
+  <table class="source-table">
+    <thead>
+      <tr>
+        <th scope="col">Columns</th>
+        <th scope="col">Source</th>
+        <th scope="col">Basis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r) => (
+          <tr
+            data-variant-axis={r.variants[0]?.axis}
+            data-variant-option={r.variants[0]?.option}
+            data-row-systems={r.systemScope}
+          >
+            <td>
+              {r.columns.map((c) => (
+                <span class="col-chip" data-system={c.system}>
+                  {c.label}
+                  {c.group ? ` ${c.group}` : ''}
+                </span>
+              ))}
+              {r.pendingOnly && <span class="col-chip col-chip--held">not published</span>}
+            </td>
+            <td class="source-cell">
+              {/*
+                The designation links to the publisher's own page for the standard.
+                Naming a document and leaving the reader to go find it is only half a
+                citation, and this project's whole claim is that the figures are
+                traceable. Links go to the publisher rather than to a copy on
+                somebody's file server, because the publisher's page is the one that
+                stays correct about which revision is current.
+              */}
+              {r.source.url ? (
+                <a class="std" href={r.source.url} rel="noopener nofollow" target="_blank">
+                  {r.source.standard}
+                  {r.source.edition ? ` (${r.source.edition})` : ''}
+                  <span class="ext" aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <strong>
+                  {r.source.standard}
+                  {r.source.edition ? ` (${r.source.edition})` : ''}
+                </strong>
+              )}
+              {r.source.publisher && <span class="publisher">{r.source.publisher}</span>}
+              <span class="provides">{r.source.provides}</span>
+              {r.source.urlNote && <span class="url-note">No publisher page: {r.source.urlNote}</span>}
+            </td>
+            <td>
+              {/* A definition and a published standard are different kinds of
+                  claim, and the reader is entitled to know which one is behind a
+                  column. Dressing arithmetic up as a citation would be the same
+                  error as citing a standard that does not cover the column. */}
+              <span class={`basis ${r.source.definitional ? 'basis--derived' : 'basis--standard'}`}>
+                {r.source.definitional ? 'Definition' : 'Published standard'}
+              </span>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  {
+    chips.length > 0 && (
+      <div class="condition-strip">
+        <h3>Conditions</h3>
+        <ul>
+          {chips.map((c) => (
+            <li
+              data-variant-axis={c.variant?.axis}
+              data-variant-option={c.variant?.option}
+              data-system={c.system === 'both' ? undefined : c.system}
+            >
+              {c.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {
+    held.length > 0 && (
+      <div class="held">
+        <h3>Not on this page yet</h3>
+        <ul>
+          {held.map((c) => (
+            <li>
+              <strong>{c.label}</strong>: {c.verification?.note}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  <p class="verified mono">
+    {
+      v.status === 'derived'
+        ? `Recomputed from the definitions above on every build · last build audit ${v.verifiedOn}`
+        : `Checked against the standards above by ${v.verifiedBy} · ${v.verifiedOn}`
+    }
+  </p>
+
+  {/*
+    No "next review" date. A future date is a commitment, and it is accurate only
+    until the day it arrives unmet — at which point it is doing the opposite of
+    what it was put there for. The date of the last check is a fact; the date of
+    the next one is a plan, and a plan does not belong in a verification block.
+  */}
+
+  <p class="disclaimer">
+    Where the equipment manufacturer specifies a figure for the specific assembly,
+    that figure governs. This is a reference sheet, not a substitute for the
+    instructions that came with the part.
+  </p>
+</section>
+
+<style>
+  .source-block {
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--cream);
+    padding: var(--s-5);
+  }
+
+  h2 {
+    font-size: var(--step-2);
+  }
+
+  h3 {
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .intro {
+    margin-top: var(--s-2);
+    margin-bottom: var(--s-4);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 62ch;
+  }
+
+  .source-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+    background: var(--paper);
+  }
+
+  .source-table th,
+  .source-table td {
+    border: 1px solid var(--rule);
+    padding: var(--s-3);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .source-table thead th {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--cream-2);
+    font-weight: 500;
+  }
+
+  .col-chip {
+    display: inline-block;
+    margin: 0 var(--s-1) var(--s-1) 0;
+    padding: 0.08rem 0.4rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    white-space: nowrap;
+  }
+
+  .col-chip--held {
+    border-style: dashed;
+    color: var(--ink-3);
+  }
+
+  .source-cell strong,
+  .source-cell .std {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .source-cell .std {
+    color: var(--ink);
+    text-decoration-color: var(--lime-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .source-cell .std:hover {
+    color: var(--lime-ink);
+  }
+
+  .ext {
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .url-note {
+    display: block;
+    margin-top: var(--s-2);
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  .publisher {
+    display: block;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  .provides {
+    display: block;
+    margin-top: var(--s-2);
+    color: var(--ink-2);
+  }
+
+  .basis {
+    display: inline-block;
+    padding: 0.08rem 0.4rem;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .basis--standard {
+    background: var(--lime-wash);
+    border: 1px solid var(--lime-ink);
+    color: var(--lime-ink);
+  }
+
+  .basis--derived {
+    background: var(--paper);
+    border: 1px dashed var(--rule-strong);
+    color: var(--ink-2);
+  }
+
+  .condition-strip,
+  .held {
+    margin-top: var(--s-4);
+  }
+
+  .condition-strip ul,
+  .held ul {
+    margin: var(--s-2) 0 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: var(--s-2);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .held ul {
+    max-width: 78ch;
+  }
+
+  .verified {
+    margin-top: var(--s-4);
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule-strong);
+    font-size: var(--step--2);
+    color: var(--lime-ink);
+  }
+
+  .disclaimer {
+    margin-top: var(--s-2);
+    font-size: var(--step--2);
+    color: var(--ink-3);
+    max-width: 70ch;
+  }
+</style>

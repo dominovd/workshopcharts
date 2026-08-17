@@ -1,0 +1,104 @@
+{
+  "home": {
+    "title": "Workshop Charts — printable reference sheets built from published standards",
+    "description": "Free printable reference charts for the bench, toolbox and jobsite. Every column names the standard it comes from, and every chart shows the date it was last checked.",
+    "canonical": "https://workshopcharts.com/",
+    "h1": [
+      "The chart you need.Ready to print."
+    ],
+    "images": [],
+    "links": [
+      "/",
+      "/charts/",
+      "/for-shop-class/",
+      "/how-we-verify/",
+      "/charts/",
+      "/charts/",
+      "/wire-gauge-chart/",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/charts/#electrical",
+      "/charts/#machining",
+      "/charts/#fasteners",
+      "/charts/#tools",
+      "/for-shop-class/",
+      "/",
+      "/wire-gauge-chart/",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/how-we-verify/",
+      "/for-shop-class/",
+      "/charts/"
+    ],
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "bodyText": "Skip to content\nFree to use\n·\nNo sign-up\n·\nBuilt from published standards\nWORKSHOP\nCHARTS\nCharts\nFor Shop Class\nHow We Verify\nFind a chart\n\nREFERENCE SHEETS FOR THE WORKSHOP\n\nThe chart you need.\nReady to print.\n\nClear, checkable reference charts for the bench, toolbox and jobsite.\n\nBrowse all 3 charts\nBrowse by trade\n\nEvery column on every sheet names the standard behind it. 7 more charts are drafted and held until each one is checked.\n\nWIRE GAUGE CHART\n\nAWG\tDIAMETER IN\tDIAMETER MM\tAREA CIRCULAR MILS\n0000\t0.4600\t11.684\t211,600.0\n000\t0.4096\t10.405\t167,806.4\n00\t0.3648\t9.266\t133,076.5\n0\t0.3249\t8.251\t105,534.5\n1\t0.2893\t7.348\t83,692.7\n2\t0.2576\t6.544\t66,371.3\n3\t0.2294\t5.827\t52,634.8\n4\t0.2043\t5.189\t41,741.3\n5\t0.1819\t4.621\t33,102.4\n6\t0.1620\t4.115\t26,251.4\n7\t0.1443\t3.665\t20,818.3\n8\t0.1285\t3.264\t16,509.7\n9\t0.1144\t2.906\t13,092.7\n10\t0.1019\t2.588\t10,383.0\n\nSources: AWG geometric series; ASTM B258 · Last checked 2026-08-17\n\nSOURCES\nMAPPED\nPER COLUMN\nSources mapped to columns\n\nNot one citation under the table. Each column names the document it came from, and the build fails if a column has none.\n\nDate last checked\n\nShown on every chart. The date something was checked is a fact; a date for the nex",
+    "status": 200
+  },
+  "wire": {
+    "title": "Wire Gauge Chart — sources per column | Workshop Charts",
+    "description": "AWG sizes with conductor diameter and cross-sectional area, computed from the AWG definition.",
+    "canonical": "https://workshopcharts.com/wire-gauge-chart/",
+    "h1": [
+      "Wire Gauge Chart"
+    ],
+    "images": [],
+    "links": [
+      "/",
+      "/charts/",
+      "/for-shop-class/",
+      "/how-we-verify/",
+      "/charts/",
+      "/",
+      "/charts/",
+      "/sheets/wire-gauge-chart.pdf",
+      "/sheets/wire-gauge-chart.png",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/",
+      "/wire-gauge-chart/",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/how-we-verify/",
+      "/for-shop-class/",
+      "/charts/"
+    ],
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "bodyText": "Skip to content\nFree to use\n·\nNo sign-up\n·\nBuilt from published standards\nWORKSHOP\nCHARTS\nCharts\nFor Shop Class\nHow We Verify\nFind a chart\nHome\nElectrical\nWire Gauge Chart\n\nELECTRICAL REFERENCE\n\nWire Gauge Chart\n\nAWG sizes with conductor diameter and cross-sectional area, computed from the AWG definition.\n\nBASIS\nComputed from definitions\nLAST CHECKED\n2026-08-17\nSHEET\nlandscape\nFind a size\nUNITS\nBoth\nInches\nMetric\n\nBoth unit systems load with the page. The filter searches every column.\n\nWire Gauge\nEvery size from 4/0 through 40 AWG, with no gaps. Includes 16–22 AWG for speaker and 12 V work.\nAWG\tDIAMETER\tAREA\n\tin\tmm\tcircular mils\tmm²\n0000\t0.4600\t11.684\t211,600.0\t107.2193\n000\t0.4096\t10.405\t167,806.4\t85.0288\n00\t0.3648\t9.266\t133,076.5\t67.4309\n0\t0.3249\t8.251\t105,534.5\t53.4751\n1\t0.2893\t7.348\t83,692.7\t42.4077\n2\t0.2576\t6.544\t66,371.3\t33.6308\n3\t0.2294\t5.827\t52,634.8\t26.6705\n4\t0.2043\t5.189\t41,741.3\t21.1506\n5\t0.1819\t4.621\t33,102.4\t16.7732\n6\t0.1620\t4.115\t26,251.4\t13.3018\n7\t0.1443\t3.665\t20,818.3\t10.5488\n8\t0.1285\t3.264\t16,509.7\t8.3656\n9\t0.1144\t2.906\t13,092.7\t6.6342\n10\t0.1019\t2.588\t10,383.0\t5.2612\n11\t0.0907\t2.305\t8,234.1\t4.1723\n12\t0.0808\t2.053\t6,529.9\t3.3088\n13\t0.0720\t1.828\t5,178.5\t2.6240\n14\t0.06",
+    "status": 200
+  },
+  "wire-mobile": {
+    "title": "Wire Gauge Chart — sources per column | Workshop Charts",
+    "description": "AWG sizes with conductor diameter and cross-sectional area, computed from the AWG definition.",
+    "canonical": "https://workshopcharts.com/wire-gauge-chart/",
+    "h1": [
+      "Wire Gauge Chart"
+    ],
+    "images": [],
+    "links": [
+      "/",
+      "/charts/",
+      "/for-shop-class/",
+      "/how-we-verify/",
+      "/charts/",
+      "/",
+      "/charts/",
+      "/sheets/wire-gauge-chart.pdf",
+      "/sheets/wire-gauge-chart.png",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/",
+      "/wire-gauge-chart/",
+      "/drill-bit-size-chart/",
+      "/fraction-to-decimal-chart/",
+      "/how-we-verify/",
+      "/for-shop-class/",
+      "/charts/"
+    ],
+    "scrollWidth": 525,
+    "innerWidth": 390,
+    "bodyText": "Skip to content\nFree to use\n·\nNo sign-up\n·\nBuilt from published standards\nWORKSHOP\nCHARTS\nCharts\nFor Shop Class\nHow We Verify\nFind a chart\nHome\nElectrical\nWire Gauge Chart\n\nELECTRICAL REFERENCE\n\nWire Gauge Chart\n\nAWG sizes with conductor diameter and cross-sectional area, computed from the AWG definition.\n\nBASIS\nComputed from definitions\nLAST CHECKED\n2026-08-17\nSHEET\nlandscape\nFind a size\nUNITS\nBoth\nInches\nMetric\n\nBoth unit systems load with the page. The filter searches every column.\n\nWire Gauge\nEvery size from 4/0 through 40 AWG, with no gaps. Includes 16–22 AWG for speaker and 12 V work.\nAWG\tDIAMETER\tAREA\n\tin\tmm\tcircular mils\tmm²\n0000\t0.4600\t11.684\t211,600.0\t107.2193\n000\t0.4096\t10.405\t167,806.4\t85.0288\n00\t0.3648\t9.266\t133,076.5\t67.4309\n0\t0.3249\t8.251\t105,534.5\t53.4751\n1\t0.2893\t7.348\t83,692.7\t42.4077\n2\t0.2576\t6.544\t66,371.3\t33.6308\n3\t0.2294\t5.827\t52,634.8\t26.6705\n4\t0.2043\t5.189\t41,741.3\t21.1506\n5\t0.1819\t4.621\t33,102.4\t16.7732\n6\t0.1620\t4.115\t26,251.4\t13.3018\n7\t0.1443\t3.665\t20,818.3\t10.5488\n8\t0.1285\t3.264\t16,509.7\t8.3656\n9\t0.1144\t2.906\t13,092.7\t6.6342\n10\t0.1019\t2.588\t10,383.0\t5.2612\n11\t0.0907\t2.305\t8,234.1\t4.1723\n12\t0.0808\t2.053\t6,529.9\t3.3088\n13\t0.0720\t1.828\t5,178.5\t2.6240\n14\t0.06",
+    "status": 200
+  }
+}

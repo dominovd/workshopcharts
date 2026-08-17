@@ -1,0 +1,131 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site.ts';
+
+/**
+ * Terms.
+ *
+ * The hard part of this page is the liability section, and DESIGN.md §4 is explicit
+ * about it: a disclaimer is necessary, and the usual "we accept no responsibility
+ * for anything" wording reads as "these numbers may be anything at all" — which
+ * destroys exactly the value a reader came for.
+ *
+ * So the wording here is a scope statement rather than a retreat: this is a general
+ * reference, the assembly in front of you has its own specification, and where they
+ * differ the specification wins. That is true, useful, and does not undercut the
+ * source block sitting on every chart.
+ */
+---
+
+<Base
+  title="Terms of use | Workshop Charts"
+  description="Free to use, print and photocopy, including in class. What the charts are, what they are not a substitute for, and the limits of what a reference sheet can promise."
+>
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">Terms</p>
+      <h1>Terms of use</h1>
+      <p class="lede">Last updated 17 August 2026.</p>
+    </header>
+
+    <div class="prose">
+      <h2>Use the charts</h2>
+      <p>
+        View, print, photocopy, download and hand out the charts and sheets on this
+        site, for personal, classroom or commercial work. No permission, no attribution
+        requirement, no fee. Instructors may print class sets and put sheets on the wall.
+      </p>
+      <p>
+        What is not open is wholesale republication as your own reference site:
+        scraping the tables to rebuild this catalogue elsewhere. The charts exist to be
+        used, not to be re-hosted stripped of the sources that make them worth trusting.
+      </p>
+
+      <h2>What these charts are</h2>
+      <p>
+        General reference tables, each naming the published standard or definition its
+        columns come from and the date it was last checked. Where a figure is derived
+        from a definition rather than transcribed, the page says so.
+      </p>
+
+      <h2>What they are not a substitute for</h2>
+      <p>
+        The specification for the thing in front of you. A torque figure for a class of
+        fastener is not the figure for a particular joint; an ampacity from a table is
+        not the ampacity of a particular installation. Where the manufacturer's
+        instructions, the engineering drawing, or the applicable code gives a figure for
+        your specific case, <strong>that figure governs</strong>, not this site.
+      </p>
+      <p>
+        This is a scope statement, not a shrug. The numbers here are checked and the
+        sources are named so you can check them too. But no reference sheet can know the
+        conditions of your assembly, and the ones that imply otherwise are the reason
+        this project bothers to print conditions next to every figure.
+      </p>
+
+      <h2>Errors</h2>
+      <p>
+        Charts are checked before publication and re-checked on a working schedule, and
+        errors still happen. If you find a figure that disagrees with the standard it
+        cites, write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. It gets
+        checked ahead of new work, and corrections change the checked date on the page.
+      </p>
+
+      <h2>Liability</h2>
+      <p>
+        The site is provided as-is, without warranty. To the extent the law allows, the
+        project is not liable for loss arising from use of these charts. Applying a
+        figure to real work stays a professional judgement, and where safety or code
+        compliance depends on it, verify against the standard or the specification for
+        that job.
+      </p>
+
+      <h2>Availability</h2>
+      <p>
+        Free with no accounts and no rate limits, and no guarantee of uptime. The sheets
+        are ordinary PDF and PNG files, so downloading the one you rely on is a reasonable
+        thing to do.
+      </p>
+
+      <h2>Changes</h2>
+      <p>
+        These terms may change; the date above moves when they do. Material changes will
+        be described rather than quietly swapped in.
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: var(--s-6) var(--s-7);
+    max-width: 76ch;
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+  }
+
+  .prose {
+    margin-top: var(--s-6);
+  }
+
+  .prose h2 {
+    font-size: var(--step-2);
+    margin-top: var(--s-6);
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose p {
+    margin-top: var(--s-3);
+    color: var(--ink-2);
+  }
+</style>

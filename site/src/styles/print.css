@@ -1,0 +1,109 @@
+/*
+ * Print.
+ *
+ * Orientation comes from the chart data, not from here: each page sets
+ * `@page { size: … }` inline from `chart.printOrientation`, because a
+ * three-column drill chart wants portrait and an eight-column wire table does
+ * not, and hard-coding one loses half the pages (DESIGN.md §3).
+ *
+ * The printed sheet is a different document from the screen page, not a
+ * screenshot of it. Everything that exists to navigate disappears; everything
+ * that makes the numbers checkable stays, including the source line — a sheet on
+ * a wall with no standard on it is exactly what is already at the top of the
+ * search results.
+ */
+
+@media print {
+  :root {
+    --paper: #fff;
+    --cream: #fff;
+    --rule: #999;
+    --rule-strong: #333;
+    --ink: #000;
+    --ink-2: #000;
+    --ink-3: #333;
+  }
+
+  body {
+    background: #fff;
+    font-size: 10pt;
+  }
+
+  /* Navigation, controls, cross-links: not on the sheet. */
+  .site-header,
+  .site-footer,
+  .topbar,
+  .no-print,
+  .artifact-bar,
+  .chart-controls,
+  .related,
+  .faq,
+  .promo {
+    display: none !important;
+  }
+
+  .print-only {
+    display: revert !important;
+  }
+
+  .shell {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  /* The sheet must use the full height — a fifth of the canvas left empty was
+     visible in the guitar charts and had to be fixed there. */
+  .print-sheet {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .print-sheet .data-table {
+    flex: 1;
+  }
+
+  .data-table {
+    font-size: 9.2pt;
+    page-break-inside: auto;
+  }
+
+  .data-table thead {
+    display: table-header-group;
+  }
+
+  .data-table tr {
+    page-break-inside: avoid;
+  }
+
+  .data-table th,
+  .data-table td {
+    border-color: #999;
+    padding: 0.16rem 0.34rem;
+  }
+
+  .data-table thead th {
+    border-bottom: 1.5px solid #000;
+  }
+
+  /* Source, conditions and coverage stay on the printed sheet. */
+  .source-block,
+  .condition-strip,
+  .coverage-note {
+    display: block !important;
+    border-color: #333;
+  }
+
+  .source-block {
+    font-size: 8pt;
+    page-break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  h1 {
+    font-size: 20pt;
+  }
+}

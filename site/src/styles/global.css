@@ -1,0 +1,203 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  font-synthesis-weight: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  margin: 0;
+  line-height: 1.02;
+  letter-spacing: -0.022em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--step-5);
+}
+h2 {
+  font-size: var(--step-4);
+}
+h3 {
+  font-size: var(--step-2);
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--s-5);
+}
+
+.stack > * + * {
+  margin-top: var(--flow, var(--s-4));
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: var(--tap);
+  padding: 0 var(--s-5);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn--solid {
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn--lime {
+  background: var(--lime);
+  border-color: var(--lime-ink);
+  color: var(--ink);
+}
+
+.btn--quiet {
+  border-color: var(--rule-strong);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--step-0);
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid var(--rule);
+  padding: 0.42rem 0.7rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.data-table thead th {
+  background: var(--cream);
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.data-table td {
+  font-family: var(--font-mono);
+  /* Required, not cosmetic: proportional digits make columns unscannable. */
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table td:first-child,
+.data-table th:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Zebra via a hairline instead of a fill, so nothing turns to grey mud in
+   black-and-white on a cheap printer. */
+.data-table tbody tr:nth-child(5n) td {
+  border-bottom-color: var(--rule-strong);
+}
+
+/* --------------------------------------------------------------------------
+   Cards and rules
+   -------------------------------------------------------------------------- */
+
+.panel {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.hairline {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

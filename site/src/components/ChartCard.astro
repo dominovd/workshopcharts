@@ -1,0 +1,130 @@
+---
+import type { Chart } from '../data/schema.ts';
+import { visibleColumns, formatCell } from '../lib/view.ts';
+import { trades } from '../data/registry.ts';
+
+interface Props {
+  chart: Chart;
+  /** Rows shown in the thumbnail. The card is a real slice of the table. */
+  preview?: number;
+}
+const { chart, preview = 6 } = Astro.props;
+
+const columns = visibleColumns(chart).slice(0, 4);
+const rows = chart.rows.slice(0, preview);
+const trade = trades.find((t) => t.id === chart.trade)!;
+---
+
+<a class="chart-card" href={`/${chart.slug}/`}>
+  {/* A real slice of the real table, generated from the same data as the page.
+      A card that shows a made-up preview is a small version of the problem this
+      project exists to fix. */}
+  <div class="thumb" aria-hidden="true">
+    <table>
+      <thead>
+        <tr>{columns.map((c) => <th>{c.group ? `${c.label} ${c.group}` : c.label}</th>)}</tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>{columns.map((c) => <td>{formatCell(row.cells[c.key], c.precision)}</td>)}</tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <span class="fade"></span>
+  </div>
+
+  <div class="meta">
+    <h3>{chart.title}</h3>
+    <p class="trade">{trade.label}</p>
+    <span class="arrow" aria-hidden="true">→</span>
+  </div>
+</a>
+
+<style>
+  .chart-card {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+    text-decoration: none;
+    overflow: hidden;
+  }
+
+  .chart-card:hover {
+    border-color: var(--ink);
+  }
+
+  .thumb {
+    position: relative;
+    padding: var(--s-3);
+    height: 11.5rem;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    border: 1px solid var(--rule);
+    padding: 0.14rem 0.3rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th {
+    background: var(--cream);
+    font-weight: 500;
+    font-size: 0.52rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+  }
+
+  td:first-child,
+  th:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .fade {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 2.6rem;
+    background: linear-gradient(to bottom, transparent, var(--paper));
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    padding: var(--s-4);
+    border-top: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: var(--step-1);
+    grid-column: 1;
+  }
+
+  .trade {
+    grid-column: 1;
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+
+  .arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    font-size: var(--step-1);
+  }
+</style>

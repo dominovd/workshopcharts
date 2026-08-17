@@ -1,0 +1,24 @@
+{
+  "name": "workshopcharts",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run check:data && astro build && npm run render:sheets && npm run check:html",
+    "build:pages": "npm run check:data && astro build",
+    "preview": "astro preview",
+    "check:data": "node --experimental-strip-types scripts/check-data.ts",
+    "check:types": "astro check",
+    "render:sheets": "node scripts/render-sheets.mjs",
+    "check:html": "node scripts/check-html.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.2.5",
+    "@fontsource-variable/roboto-mono": "^5.2.5",
+    "astro": "^5.13.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

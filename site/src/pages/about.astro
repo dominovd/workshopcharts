@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site.ts';
+import { siteCounts, publishedCharts, pendingVerification } from '../data/registry.ts';
+
+/**
+ * About.
+ *
+ * A reference site with no named expert author has one thing it can offer instead:
+ * a process the reader can inspect, and a straight answer about what is and is not
+ * on the site. So this page states the count, the method and the limits, and links
+ * to the detail rather than repeating it.
+ */
+const derived = publishedCharts.filter((c) => c.verification.status === 'derived').length;
+---
+
+<Base
+  title="About Workshop Charts"
+  description="Who makes Workshop Charts, why every column names its source, and why a drafted chart stays off the site until someone has read it against the standard."
+>
+  <div class="shell page">
+    <header class="page__head">
+      <p class="eyebrow">About</p>
+      <h1>About Workshop Charts</h1>
+      <p class="lede">
+        Reference sheets for the bench, built so a reader can check where every
+        number came from.
+      </p>
+    </header>
+
+    <div class="prose">
+      <h2>What this is</h2>
+      <p>
+        Printable reference charts for electrical, machining, fastener and tool work.
+        Free, no sign-up, no paywall, no limits. {siteCounts.published} charts are
+        published and {siteCounts.inVerification} more are drafted and held.
+      </p>
+
+      <h2>Why it exists</h2>
+      <p>
+        Search for a drill chart or a wire gauge table and the top results are raw
+        PDFs from university course pages, a table on the server of a physics
+        laboratory, and pages last touched in the nineties. The tables are mostly
+        fine. What none of them tell you is which standard the numbers come from or
+        when anyone last checked. That is the whole gap this site is built into.
+      </p>
+
+      <h2>How the charts are made</h2>
+      <p>
+        Two ways, and the difference is stated on every page. {derived} charts are
+        computed from a definition. AWG is a defined geometric series and an inch
+        fraction is its own decimal, so the build recomputes every figure and fails
+        if one drifts. Everything else has to be transcribed from a published
+        standard and then read back against it by a person before it goes up. There
+        is no third category. <a href="/how-we-verify/">How we verify</a> has the
+        detail, including what the automated checks cannot catch.
+      </p>
+
+      <h2>What is deliberately missing</h2>
+      <p>
+        There is no ampacity column on the wire gauge chart, because how much current
+        a conductor may carry is a property of an installation rather than of a wire
+        size. There is no torque chart yet, because a torque figure without its
+        thread condition is not a specification. {pendingVerification.length} charts
+        are drafted and held for reasons like these; they are listed on
+        <a href="/charts/">the catalogue</a> with the standard each one is waiting on.
+      </p>
+
+      <h2>Who runs it</h2>
+      <p>
+        A small independent project, not a manufacturer and not a retailer. Nothing on
+        the site is sponsored, and no chart is shaped by anyone who sells the parts it
+        describes.
+      </p>
+
+      <h2>Corrections</h2>
+      <p>
+        If a figure here disagrees with the standard it cites, that is the most useful
+        message this project can receive. Write to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with the chart and the
+        clause, and it gets checked before anything else in the queue.
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: var(--s-6) var(--s-7);
+    max-width: 78ch;
+  }
+
+  h1 {
+    margin-top: var(--s-2);
+    font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+  }
+
+  .lede {
+    margin-top: var(--s-3);
+    max-width: 46ch;
+  }
+
+  .prose {
+    margin-top: var(--s-6);
+  }
+
+  .prose h2 {
+    font-size: var(--step-2);
+    margin-top: var(--s-6);
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose p {
+    margin-top: var(--s-3);
+    color: var(--ink-2);
+  }
+</style>
