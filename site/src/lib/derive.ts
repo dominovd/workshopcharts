@@ -111,7 +111,7 @@ export interface FractionRow {
  *
  * Note what is NOT here: a separate "decimal equivalent" column. For a
  * fractional size the diameter in inches and the decimal equivalent are the
- * same number, and on a sheet meant to be read from a metre away a duplicated
+ * same number, and on a sheet meant to be read from a meter away a duplicated
  * column costs the density that is the reason to print it at all.
  */
 export function sixtyFourthsSeries(from = 1, to = 64): FractionRow[] {

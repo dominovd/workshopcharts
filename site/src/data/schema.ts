@@ -15,7 +15,7 @@
  *    the standard by a human.
  *
  * 3. Row-set completeness is declared. A reference table is either a continuous
- *    run of a series or an explicitly labelled selection. A silent gap (a
+ *    run of a series or an explicitly labeled selection. A silent gap (a
  *    series that skips -009 with no note) is a defect the test catches.
  */
 
@@ -42,7 +42,7 @@
  *                planned work, never as a chart.
  *
  * There is deliberately no fourth level. "Looks internally consistent" is not
- * a truth level — a table can round inches to millimetres perfectly and still
+ * a truth level — a table can round inches to millimeters perfectly and still
  * disagree with the standard on every row.
  */
 export type TruthLevel = 'derived' | 'verified' | 'needs-review';
@@ -127,7 +127,7 @@ export type UnitSystem = 'imperial' | 'metric' | 'both';
  *
  * A toggle that has nothing behind it is not rendered. An Aluminum button that
  * changes nothing is worse than no button: it tells the reader the table covers
- * aluminium when it does not.
+ * aluminum when it does not.
  */
 export interface VariantRef {
   /** Toggle group: `material`, `construction`. */
@@ -225,6 +225,29 @@ export interface Row {
    * is for.
    */
   asPrinted?: Record<string, string>;
+  /**
+   * Qualifiers that apply to ONE cell, keyed by column.
+   *
+   * `Column.conditions` covers a whole column, which is the right shape for
+   * "uncoated copper, DC at 75 °C". It is the wrong shape for a standard's own
+   * footnotes, which land on individual cells, and stretching one to cover the
+   * other would either over-apply a restriction to rows it does not touch or
+   * bury it where the reader will not meet it.
+   *
+   * NEC Table 310.16 is the case that forced this. Its 14 AWG aluminum row
+   * carries two different footnotes, and not evenly: the 60 °C cell is
+   * restricted to copper-clad aluminum, while the 75 °C and 90 °C cells are
+   * restricted to copper-clad aluminum AND usable only for adjustment or
+   * correction rather than as a working ampacity. Three cells, two claims, one
+   * row. A column-level condition cannot say that; a row-level one cannot
+   * either.
+   *
+   * Cells sharing the same text share one marker, the way a standard reuses a
+   * footnote number. `check-data.ts` enforces both directions: a marker with no
+   * cell and a cell whose note names a column it does not have are both build
+   * failures.
+   */
+  notes?: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -243,7 +266,7 @@ export interface Chart {
   trade: Trade;
 
   /**
-   * Whether the row set is the full run of the series or a labelled selection.
+   * Whether the row set is the full run of the series or a labeled selection.
    * `selected` requires `selectionLabel`, which is printed in the table caption.
    * This exists because a reference table with a silent gap is worse than a
    * short one: the reader cannot tell absence from omission.

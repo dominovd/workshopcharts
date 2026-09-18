@@ -19,83 +19,12 @@ import type { Chart } from '../schema.ts';
 
 export const pendingCharts: Chart[] = [
   {
-    slug: 'wire-ampacity-chart',
-    title: 'Wire Ampacity Chart',
-    subtitle: 'Allowable ampacity of copper and aluminium conductors under NEC 310.16.',
-    trade: 'electrical',
-    completeness: 'selected',
-    coverageNote: 'Sizes covered by NEC Table 310.16.',
-    printOrientation: 'landscape',
-    sources: [
-      {
-        id: 'nec-310-16',
-        standard: 'NEC Table 310.16',
-        publisher: 'NFPA',
-        provides:
-          'Allowable ampacity of insulated conductors rated up to 2000 V, not more than three current-carrying conductors in a raceway, cable or earth, at an ambient of 30 °C.',
-        url: 'https://www.nfpa.org/codes-and-standards/nfpa-70-standard-development/70',
-      },
-      {
-        id: 'nec-240-4d',
-        standard: 'NEC 240.4(D)',
-        publisher: 'NFPA',
-        provides:
-          'Small-conductor overcurrent limits, which cap protection for 14, 12 and 10 AWG below what 310.16 alone would allow.',
-        url: 'https://www.nfpa.org/codes-and-standards/nfpa-70-standard-development/70',
-      },
-    ],
-    columns: [
-      { key: 'awg', label: 'Size', unit: 'none', system: 'both', sources: ['nec-310-16'] },
-      {
-        key: 'cu60',
-        label: 'Copper 60 °C',
-        unit: 'none',
-        system: 'both',
-        sources: ['nec-310-16'],
-        conditions: ['60 °C insulation rating', 'Not more than three current-carrying conductors'],
-      },
-      {
-        key: 'cu75',
-        label: 'Copper 75 °C',
-        unit: 'none',
-        system: 'both',
-        sources: ['nec-310-16'],
-        conditions: ['75 °C insulation rating', 'Not more than three current-carrying conductors'],
-      },
-      {
-        key: 'ocpdLimit',
-        label: 'Max OCPD',
-        unit: 'none',
-        system: 'both',
-        sources: ['nec-240-4d'],
-        conditions: ['Applies to 14, 12 and 10 AWG regardless of the 310.16 figure'],
-      },
-    ],
-    conditions: [
-      'Ampacity is a property of an installation, not of a wire size. Insulation rating, ambient temperature, conduit fill and conductor bundling all reduce it.',
-      'For branch-circuit wiring the overcurrent limits in 240.4(D) apply on top of the 310.16 ampacity.',
-    ],
-    verification: {
-      status: 'needs-review',
-      verifiedOn: '2026-08-17',
-      note: 'HELD, AND THE REASON MATTERS. The design draft carried a MAX AMPS column on the wire gauge page reading 35 A at 14 AWG, 47 at 12, 60 at 10, rising to 380 at 4/0. Those figures match the "maximum amps for chassis wiring" column of the hobby AWG table that has circulated since the mid-century, which is free air rather than raceway. NEC 310.16 for copper at 75 °C gives 20, 25 and 35 A for the same three sizes, and 240.4(D) then caps protection at 15, 20 and 30 A. The draft figures ran roughly double the code limit, on the page a person sizing a receptacle circuit would land on first. A footnote saying "depends on installation method" does not undo a printed number. Transcribe 310.16 and 240.4(D) directly, keep the two temperature columns separate, and do not merge this into the wire gauge page, because the whole point is that ampacity carries its own conditions.',
-    },
-    rows: [],
-    pinSheet: { columns: [], rowColumns: 2 },
-    printSheet: { rowColumns: 1 },
-    metaTitle: '',
-    metaDescription: '',
-    imageAlt: '',
-    related: ['wire-gauge-chart'],
-  },
-
-  {
     slug: 'o-ring-size-chart',
     title: 'O-Ring Size Chart',
     subtitle: 'AS568 standard O-ring inside diameter and cross-section.',
     trade: 'tools',
     completeness: 'selected',
-    coverageNote: 'To be decided at verification: full dash-number run, or a labelled selection.',
+    coverageNote: 'To be decided at verification: full dash-number run, or a labeled selection.',
     printOrientation: 'landscape',
     sources: [
       {
@@ -117,7 +46,7 @@ export const pendingCharts: Chart[] = [
     verification: {
       status: 'needs-review',
       verifiedOn: '2026-08-17',
-      note: 'HELD. The design draft showed -006 through -012 with IDs of 0.070, 0.103, 0.139, 0.210, 0.239, 0.301 and skipped -009 without a note. The values look like the series shifted by one row: the draft -011 (0.239) and -012 (0.301) sit where -010 and -011 belong. The draft -006 also had ID equal to cross-section, which is not how the start of the series reads. Note that this table passed every mechanical check available, converting inches to millimetres perfectly on every row, which is exactly why a sight-check against the standard is not optional. Read AS568 directly, decide whether the page carries the full dash-number run or a labelled selection, and never leave an unmarked gap in a series.',
+      note: 'HELD. The design draft showed -006 through -012 with IDs of 0.070, 0.103, 0.139, 0.210, 0.239, 0.301 and skipped -009 without a note. The values look like the series shifted by one row: the draft -011 (0.239) and -012 (0.301) sit where -010 and -011 belong. The draft -006 also had ID equal to cross-section, which is not how the start of the series reads. Note that this table passed every mechanical check available, converting inches to millimeters perfectly on every row, which is exactly why a sight-check against the standard is not optional. Read AS568 directly, decide whether the page carries the full dash-number run or a labeled selection, and never leave an unmarked gap in a series.',
     },
     rows: [],
     pinSheet: { columns: [], rowColumns: 2 },
@@ -240,7 +169,7 @@ export const pendingCharts: Chart[] = [
   {
     slug: 'number-drill-bit-size-chart',
     title: 'Number Drill Bit Size Chart',
-    subtitle: 'Number gauge drill sizes 1 to 80 with decimal inch and millimetre equivalents.',
+    subtitle: 'Number gauge drill sizes 1 to 80 with decimal inch and millimeter equivalents.',
     trade: 'machining',
     series: 'drill-sizes',
     seriesLabel: 'Number sizes (1–80)',
@@ -280,7 +209,7 @@ export const pendingCharts: Chart[] = [
   {
     slug: 'letter-drill-bit-size-chart',
     title: 'Letter Drill Bit Size Chart',
-    subtitle: 'Letter gauge drill sizes A to Z with decimal inch and millimetre equivalents.',
+    subtitle: 'Letter gauge drill sizes A to Z with decimal inch and millimeter equivalents.',
     trade: 'machining',
     series: 'drill-sizes',
     seriesLabel: 'Letter sizes (A–Z)',
@@ -325,7 +254,7 @@ export const pendingCharts: Chart[] = [
     series: 'drill-sizes',
     seriesLabel: 'Metric sizes',
     completeness: 'selected',
-    coverageNote: 'To be decided at verification: the full preferred series, or a labelled selection.',
+    coverageNote: 'To be decided at verification: the full preferred series, or a labeled selection.',
     printOrientation: 'portrait',
     sources: [
       {
@@ -428,7 +357,7 @@ export const pendingCharts: Chart[] = [
   {
     slug: 'sheet-metal-gauge-chart',
     title: 'Sheet Metal Gauge Chart',
-    subtitle: 'Sheet metal gauge to thickness for steel, galvanised steel and aluminium.',
+    subtitle: 'Sheet metal gauge to thickness for steel, galvanised steel and aluminum.',
     trade: 'machining',
     completeness: 'selected',
     coverageNote: 'To be decided at verification.',
@@ -443,20 +372,20 @@ export const pendingCharts: Chart[] = [
       },
       {
         id: 'awg-aluminum',
-        standard: 'AWG (Brown & Sharpe) for aluminium sheet',
-        provides: 'Aluminium sheet gauge follows the AWG series rather than the steel standard.',
+        standard: 'AWG (Brown & Sharpe) for aluminum sheet',
+        provides: 'Aluminum sheet gauge follows the AWG series rather than the steel standard.',
         urlNote:
-          'Not a separate document: aluminium sheet gauge follows the AWG series, so the source is the AWG definition applied to sheet rather than the steel gauge table.',
+          'Not a separate document: aluminum sheet gauge follows the AWG series, so the source is the AWG definition applied to sheet rather than the steel gauge table.',
       },
     ],
     columns: [
       { key: 'gauge', label: 'Gauge', unit: 'none', system: 'both', sources: ['msg'] },
       { key: 'steelIn', label: 'Steel', group: 'in', unit: 'in', system: 'imperial', precision: 4, sources: ['msg'] },
       { key: 'galvIn', label: 'Galvanised', group: 'in', unit: 'in', system: 'imperial', precision: 4, sources: ['msg'] },
-      { key: 'aluminumIn', label: 'Aluminium', group: 'in', unit: 'in', system: 'imperial', precision: 4, sources: ['awg-aluminum'] },
+      { key: 'aluminumIn', label: 'Aluminum', group: 'in', unit: 'in', system: 'imperial', precision: 4, sources: ['awg-aluminum'] },
     ],
     conditions: [
-      'Sheet gauge is material-specific: the same gauge number is a different thickness in steel, galvanised steel and aluminium.',
+      'Sheet gauge is material-specific: the same gauge number is a different thickness in steel, galvanised steel and aluminum.',
     ],
     verification: {
       status: 'needs-review',

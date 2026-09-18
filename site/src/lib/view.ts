@@ -1,4 +1,4 @@
-import type { Chart, Column, Source, UnitSystem, VariantRef } from '../data/schema.ts';
+import type { Chart, Column, Source, UnitSystem, VariantRef, Row } from '../data/schema.ts';
 import { PUBLISHABLE } from '../data/schema.ts';
 
 /**
@@ -77,6 +77,56 @@ export function variantAxes(chart: Chart): VariantAxis[] {
         columns,
       })),
     }));
+}
+
+/**
+ * Cell-level footnotes, numbered the way a standard numbers its own.
+ *
+ * Cells carrying identical text share a marker, so a qualifier that applies to
+ * three cells is stated once and pointed at three times. Numbering follows
+ * declared row and column order, which makes it stable across builds: a marker
+ * that moved because a map iterated differently would be a diff nobody could
+ * review.
+ *
+ * A note is tagged with a variant option when every column carrying it belongs
+ * to the same one, so the list under the table leaves with the columns it
+ * describes. A footnote still sitting there after its cells are gone is the same
+ * defect as a citation that outlives its column.
+ */
+export interface ChartNote {
+  marker: number;
+  text: string;
+  variant?: VariantRef;
+}
+
+export function chartNotes(chart: Chart): ChartNote[] {
+  const order = new Map<string, { marker: number; columns: Column[] }>();
+  const visible = visibleColumns(chart);
+
+  for (const row of chart.rows) {
+    for (const col of visible) {
+      const text = row.notes?.[col.key];
+      if (!text) continue;
+      const seen = order.get(text);
+      if (seen) {
+        if (!seen.columns.includes(col)) seen.columns.push(col);
+      } else {
+        order.set(text, { marker: order.size + 1, columns: [col] });
+      }
+    }
+  }
+
+  return [...order.entries()].map(([text, { marker, columns }]) => {
+    const options = new Set(columns.map((c) => c.variant?.option));
+    const one = options.size === 1 ? columns[0]!.variant : undefined;
+    return { marker, text, variant: one };
+  });
+}
+
+/** Marker for one cell, or undefined when the cell carries no note. */
+export function noteMarker(notes: ChartNote[], row: Row, columnKey: string): number | undefined {
+  const text = row.notes?.[columnKey];
+  return text ? notes.find((n) => n.text === text)?.marker : undefined;
 }
 
 /** Unit toggle appears only if both systems have columns of their own. */

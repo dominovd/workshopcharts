@@ -147,7 +147,20 @@ for (const { slug, printOrientation } of charts) {
       ...[...body.querySelectorAll('table')].map((el) => el.scrollWidth - el.clientWidth),
       ...[...body.querySelectorAll('th, td')].map((el) => el.scrollWidth - el.clientWidth),
     );
-    return { fill: r.bottom / 1500, overflow, width: body.clientWidth };
+    /*
+     * The whole sheet, not just the table.
+     *
+     * `fill` was the table's own bottom, which answers "is the sheet full" and
+     * nothing else. A footer that grew past the canvas therefore slipped
+     * through: on the ampacity sheet the table ended at 1399 px, comfortably
+     * inside, while the footnotes pushed the footer to 1512 and the screenshot
+     * clipped the last line off. `spill` measures the bottom-most thing on the
+     * page against the canvas, so anything falling off the edge fails, wherever
+     * it lives.
+     */
+    const foot = document.querySelector('.sheet-foot');
+    const lowest = Math.max(r.bottom, foot ? foot.getBoundingClientRect().bottom : 0);
+    return { fill: r.bottom / 1500, spill: lowest - 1500, overflow, width: body.clientWidth };
   });
 
   if (!box) {
@@ -166,6 +179,12 @@ for (const { slug, printOrientation } of charts) {
         `${slug}.png is ${(box.fill * 100).toFixed(0)} % of the 1500 px canvas, so the bottom ` +
           `${Math.round((box.fill - 1) * 1500)} px are cropped out of the screenshot and the ` +
           `last rows are missing: raise pinSheet.rowColumns or drop rows`,
+      );
+    }
+    if (box.spill > 1) {
+      problems.push(
+        `${slug}.png spills ${box.spill.toFixed(0)} px past the 1500 px canvas and the ` +
+          `screenshot clips it: shorten the sheet footer, the pinSheet note or a cell note`,
       );
     }
     if (box.overflow > 1) {

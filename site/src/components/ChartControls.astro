@@ -207,7 +207,7 @@ const toggleCss = [variantCss, unitCss].filter(Boolean).join('\n');
   }
 
   /* Selected state is carried by weight and border as well as fill, so it
-     survives greyscale and does not depend on hue alone. */
+     survives grayscale and does not depend on hue alone. */
   fieldset label:has(input:checked) {
     background: var(--lime);
     border-color: var(--lime-ink);

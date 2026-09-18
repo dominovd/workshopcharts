@@ -17,7 +17,7 @@
  *     `checkEveryColumnHasASource` fails the build on that, so the map and the
  *     table cannot drift apart.
  *
- *   · An O-ring table converted inches to millimetres flawlessly on every row
+ *   · An O-ring table converted inches to millimeters flawlessly on every row
  *     and still disagreed with AS568, because the series had shifted by one row.
  *     Nothing here would have caught it. `reportUncheckable` prints that limit
  *     at the end of every run so it stays in view.
@@ -228,6 +228,47 @@ function checkPrintedFigures(chart: Chart): void {
           chart,
           `row "${row.id}" column "${col.key}": asPrinted "${printed}" and cell value ` +
             `${String(value)} are different figures.`,
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 3c. Cell-level footnotes point at cells that exist, both ways
+// ---------------------------------------------------------------------------
+
+/**
+ * Both directions, because only one of them is obvious.
+ *
+ * A note naming a column the chart does not have is the easy error and it fails
+ * loudly. The quiet one is the reverse: a note attached to a column that is held
+ * or hidden, so the marker renders nowhere and the qualifier silently stops
+ * being shown while the figure it restricts stays on the page. That is the
+ * failure mode this whole field exists to prevent, so it is checked as hard as
+ * the first.
+ */
+function checkCellNotes(chart: Chart): void {
+  const byKey = new Map(chart.columns.map((c) => [c.key, c]));
+  const visible = new Set(visibleColumns(chart).map((c) => c.key));
+
+  for (const row of chart.rows) {
+    for (const [key, text] of Object.entries(row.notes ?? {})) {
+      if (!byKey.has(key)) {
+        fail(chart, `row "${row.id}" has a note for column "${key}", which the chart does not define.`);
+        continue;
+      }
+      if (row.cells[key] === undefined || row.cells[key] === null) {
+        fail(chart, `row "${row.id}" has a note on column "${key}" but no value in that cell.`);
+      }
+      if (!text.trim()) {
+        fail(chart, `row "${row.id}" has an empty note on column "${key}".`);
+      }
+      if (!visible.has(key) && PUBLISHABLE.includes(chart.verification.status)) {
+        fail(
+          chart,
+          `row "${row.id}" has a note on column "${key}", which is held. The marker would ` +
+            `render nowhere while the figure it qualifies stays on the page.`,
         );
       }
     }
@@ -509,7 +550,7 @@ function checkCoverage(chart: Chart): void {
 
 /**
  * A toggle that changes nothing is a claim the table does not support: an
- * Aluminum button on a copper-only table tells the reader aluminium is covered.
+ * Aluminum button on a copper-only table tells the reader aluminum is covered.
  * Columns are what create toggles, so a lone variant option means data is
  * missing, not that a control is harmless.
  */
@@ -611,7 +652,7 @@ function reportUncheckable(): void {
   notes.push(
     'This script checks form. For any chart not marked "derived" it cannot tell a correct ' +
       'table from a plausible one: the O-ring series that shifted by a row converted inches ' +
-      'to millimetres perfectly on all six of them.',
+      'to millimeters perfectly on all six of them.',
   );
 
   const heldColumnCount = allCharts.reduce(
@@ -637,6 +678,7 @@ for (const chart of allCharts) {
   checkVerificationMetadata(chart);
   checkRowPresence(chart);
   checkPrintedFigures(chart);
+  checkCellNotes(chart);
   checkMonotonic(chart);
   checkConversions(chart);
   checkDerived(chart);

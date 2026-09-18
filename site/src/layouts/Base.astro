@@ -14,7 +14,7 @@ interface Props {
   printOrientation?: 'portrait' | 'landscape';
   ogImage?: string;
   /**
-   * Set by pages that emit their own richer graph (chart pages, the catalogue).
+   * Set by pages that emit their own richer graph (chart pages, the catalog).
    * Everything else gets a plain WebPage from here, so no page ships unmarked —
    * four of them did on the first pass, purely because each template had to
    * remember to do it for itself.
@@ -91,7 +91,7 @@ const defaultSchema = ownSchema
       It is cookieless: visitors are identified by a hash of the incoming request
       which is discarded after 24 hours, and no IP address is stored. What it does
       collect is listed on /privacy/, because a privacy page that describes a site's
-      intentions rather than its behaviour is worth nothing, and that page previously
+      intentions rather than its behavior is worth nothing, and that page previously
       said this site loaded no analytics at all.
 
       The script it injects lives under /_vercel/, which is served by the host at

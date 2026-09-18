@@ -56,7 +56,7 @@ const standards = standardsIndex(allCharts, publishedSlugs);
         them, so each column names its own source, and the source block on every
         page lists which columns each document covers. The build fails if a column
         has no source, or names one the page does not define, which is the only
-        reliable defence against a column being added later without one.
+        reliable defense against a column being added later without one.
       </p>
 
       <h2>What the machine checks catch</h2>
@@ -64,13 +64,13 @@ const standards = standardsIndex(allCharts, publishedSlugs);
         <li>A column with no source behind it.</li>
         <li>A citation nobody uses, which reads as coverage the table does not have.</li>
         <li>A value that breaks a monotonic run, such as torque falling as diameter grows.</li>
-        <li>Inch and millimetre columns that disagree.</li>
+        <li>Inch and millimeter columns that disagree.</li>
         <li>A gap in a series, and a control on the page with no data behind it.</li>
       </ul>
 
       <h2>What they cannot catch, and why it matters</h2>
       <p>
-        A draft of our O-ring chart converted inches to millimetres perfectly on
+        A draft of our O-ring chart converted inches to millimeters perfectly on
         every row and still disagreed with AS568 on every row: the dash numbers had
         shifted by one, so each size carried the dimensions of its neighbour. Every
         check we had passed. Consistency is not correctness, and no amount of

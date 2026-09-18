@@ -7,7 +7,7 @@ import { sixtyFourthsSeries } from '../../lib/derive.ts';
  * Three columns, not four. The mock-up carried both `DIAMETER (in)` and
  * `DECIMAL EQUIV.`, which for a fractional bit are the same number written
  * twice — 1/16 is 0.0625 in and its decimal equivalent is 0.0625. On a sheet
- * designed to be read from a metre away, the column that says nothing is the
+ * designed to be read from a meter away, the column that says nothing is the
  * one that costs the type size.
  *
  * The number, letter and metric drill series are separate pages: those are
@@ -28,7 +28,7 @@ export const drillBitSizeChart: Chart = {
   title: 'Drill Bit Size Chart',
   seriesLabel: 'Fractional (64ths)',
   subtitle:
-    'The fractional bits in a drill index, 1/64 to 1 inch, with decimal inch and millimetre equivalents. For picking a bit at the machine.',
+    'The fractional bits in a drill index, 1/64 to 1 inch, with decimal inch and millimeter equivalents. For picking a bit at the machine.',
   trade: 'machining',
   series: 'drill-sizes',
 
@@ -47,7 +47,7 @@ export const drillBitSizeChart: Chart = {
       id: 'fraction-identity',
       standard: 'Fractional sizes and the inch',
       provides:
-        'A fractional bit size IS its decimal value: 3/16 in = 0.1875 in. The millimetre column is that value × 25.4, which is the exact definition of the inch.',
+        'A fractional bit size IS its decimal value: 3/16 in = 0.1875 in. The millimeter column is that value × 25.4, which is the exact definition of the inch.',
       definitional: true,
     },
   ],
@@ -101,16 +101,16 @@ export const drillBitSizeChart: Chart = {
 
   metaTitle: 'Drill Bit Size Chart: Fractional Sizes in Inches and mm',
   metaDescription:
-    'Fractional drill bit size chart in 64ths from 1/64 to 1 inch, with decimal inch and millimetre equivalents, computed exactly and free to print. No sign-up needed.',
+    'Fractional drill bit size chart in 64ths from 1/64 to 1 inch, with decimal inch and millimeter equivalents, computed exactly and free to print. No sign-up needed.',
   imageAlt:
-    'Drill bit size chart listing every 64th from 1/64 to 1 inch with decimal inch and millimetre equivalents.',
+    'Drill bit size chart listing every 64th from 1/64 to 1 inch with decimal inch and millimeter equivalents.',
 
   rows,
 
   related: ['fraction-to-decimal-chart', 'tap-drill-size-chart'],
 
   howToUse: [
-    'Find the fractional size, or filter by a decimal or millimetre value to find the nearest bit.',
+    'Find the fractional size, or filter by a decimal or millimeter value to find the nearest bit.',
     'There is no separate decimal column because for a fractional bit the two are the same number: 3/16 in is 0.1875 in.',
     'This page carries the fractional series. The number, letter and metric series are published tables rather than arithmetic, so they are in verification and not on the site yet: see the four series listed below.',
   ],
@@ -126,7 +126,7 @@ export const drillBitSizeChart: Chart = {
     },
     {
       q: 'Will a bit drill a hole exactly its own size?',
-      a: 'Usually slightly oversize. How much depends on the bit, the material, the setup rigidity and whether the hole was centre-drilled first. For a hole that has to hold a dimension, drill under and ream or bore to size.',
+      a: 'Usually slightly oversize. How much depends on the bit, the material, the setup rigidity and whether the hole was center-drilled first. For a hole that has to hold a dimension, drill under and ream or bore to size.',
     },
   ],
 };

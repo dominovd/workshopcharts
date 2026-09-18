@@ -2,7 +2,7 @@ import type { Chart, Row } from '../schema.ts';
 import { sixtyFourthsSeries } from '../../lib/derive.ts';
 
 /**
- * Fraction / decimal / millimetre conversion sheet.
+ * Fraction / decimal / millimeter conversion sheet.
  *
  * The one chart on the site that is pure arithmetic end to end, which makes it
  * the cheapest page in the project and one of the most reached for. It is also
@@ -25,7 +25,7 @@ export const fractionDecimalMmChart: Chart = {
   slug: 'fraction-to-decimal-chart',
   title: 'Fraction to Decimal Chart',
   subtitle:
-    'Inch fractions with the count of 64ths, decimal inches, thousandths and millimetres. For reading a tape measure, a micrometer or a dial indicator and converting what you read.',
+    'Inch fractions with the count of 64ths, decimal inches, thousandths and millimeters. For reading a tape measure, a micrometer or a dial indicator and converting what you read.',
   trade: 'tools',
 
   completeness: 'continuous',
@@ -38,7 +38,7 @@ export const fractionDecimalMmChart: Chart = {
       id: 'conversion-identity',
       standard: 'The inch',
       provides:
-        'One inch is 25.4 millimetres exactly, by international definition since 1959. Thousandths are the decimal inch × 1000. Nothing on this page is a measurement.',
+        'One inch is 25.4 millimeters exactly, by international definition since 1959. Thousandths are the decimal inch × 1000. Nothing on this page is a measurement.',
       definitional: true,
     },
   ],
@@ -85,7 +85,7 @@ export const fractionDecimalMmChart: Chart = {
     },
     {
       key: 'mm',
-      label: 'Millimetres',
+      label: 'Millimeters',
       group: 'mm',
       unit: 'mm',
       system: 'metric',
@@ -115,16 +115,16 @@ export const fractionDecimalMmChart: Chart = {
 
   metaTitle: 'Fraction to Decimal Chart: 64ths, Thou and mm',
   metaDescription:
-    'Inch fraction to decimal chart in 64ths, with thousandths and millimetres for every size from 1/64 to 1 inch. Exact conversions, free to print, no sign-up needed.',
+    'Inch fraction to decimal chart in 64ths, with thousandths and millimeters for every size from 1/64 to 1 inch. Exact conversions, free to print, no sign-up needed.',
   imageAlt:
-    'Fraction to decimal conversion chart listing every 64th of an inch from 1/64 to 1 with decimal inches and millimetres.',
+    'Fraction to decimal conversion chart listing every 64th of an inch from 1/64 to 1 with decimal inches and millimeters.',
 
   rows,
 
   related: ['drill-bit-size-chart'],
 
   howToUse: [
-    'Filter by any value (fraction, 64ths, decimal, thousandths or millimetres) to find the row it belongs to.',
+    'Filter by any value (fraction, 64ths, decimal, thousandths or millimeters) to find the row it belongs to.',
     'The 64ths column is for reading a tape measure: count the sixteenths or thirty-seconds and look up the row.',
     'Thousandths are the column for a dial indicator or a micrometer marked in thou.',
     'This is a conversion sheet, not a tool list. If you want the nearest drill bit to a measurement, the drill bit size chart is the page for that.',

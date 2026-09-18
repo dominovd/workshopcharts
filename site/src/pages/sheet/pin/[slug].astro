@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import Sheet from '../../../layouts/Sheet.astro';
 import { publishedCharts } from '../../../data/registry.ts';
 import type { Chart } from '../../../data/schema.ts';
-import { visibleColumns, headerGroups, formatCell, sourceMap } from '../../../lib/view.ts';
+import { visibleColumns, headerGroups, formatCell, sourceMap , chartNotes, noteMarker } from '../../../lib/view.ts';
 
 /**
  * Source document for `dist/sheets/<slug>.png` — the vertical 1000×1500 asset.
@@ -25,6 +25,7 @@ const { chart } = Astro.props;
 
 const all = visibleColumns(chart);
 const columns = chart.pinSheet.columns.map((key) => all.find((c) => c.key === key)!);
+const notes = chartNotes(chart).filter((n) => !n.variant || columns.some((c) => c.variant?.option === n.variant!.option));
 const groups = headerGroups(columns);
 const hasGroupRow = columns.some((c) => c.group);
 
@@ -143,9 +144,9 @@ if (fontSize < MIN_LEGIBLE) {
                 <tr>
                   {columns.map((c, i) =>
                     i === 0 ? (
-                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</th>
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}{noteMarker(notes, row, c.key) && <sup>{noteMarker(notes, row, c.key)}</sup>}</th>
                     ) : (
-                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</td>
+                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}{noteMarker(notes, row, c.key) && <sup>{noteMarker(notes, row, c.key)}</sup>}</td>
                     ),
                   )}
                 </tr>
@@ -159,6 +160,11 @@ if (fontSize < MIN_LEGIBLE) {
 
   <footer class="sheet-foot">
     <span>Sources: {sources.join(' · ')} · full source map on the page</span>
+    {notes.map((n) => (
+      <span class="conditions">
+        {n.marker}. {n.text}
+      </span>
+    ))}
     {chart.pinSheet.note && <span class="conditions">{chart.pinSheet.note}</span>}
     <span class="domain">workshopcharts.com/{chart.slug}/</span>
   </footer>
@@ -184,10 +190,20 @@ if (fontSize < MIN_LEGIBLE) {
     overflow: hidden;
   }
 
+  /*
+   * No `height` on the cell, for the reason the print sheet dropped its own.
+   *
+   * `FURNITURE` is a constant guess at how much canvas the heading, caption and
+   * footer take. Writing a row height derived from that guess onto every cell
+   * makes the table claim exactly that much space whether or not it is there,
+   * and a sheet whose footer grew past the guess pushes the page past the
+   * canvas. The ampacity sheet did: four footnotes in the footer, and the last
+   * line clipped. `height: 100%` on the table shares out whatever is actually
+   * left, which needs no guess to be right.
+   */
   .sheet--pin .sheet-body th,
   .sheet--pin .sheet-body td {
     padding: var(--pin-pad) 9px;
-    height: var(--pin-row);
   }
 
   .sheet--pin .sheet-body thead th {

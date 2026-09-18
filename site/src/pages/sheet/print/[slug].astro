@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import Sheet from '../../../layouts/Sheet.astro';
 import { publishedCharts } from '../../../data/registry.ts';
 import type { Chart } from '../../../data/schema.ts';
-import { visibleColumns, headerGroups, formatCell, sourceMap, lastCheckedOn } from '../../../lib/view.ts';
+import { visibleColumns, headerGroups, formatCell, sourceMap, lastCheckedOn , chartNotes, noteMarker } from '../../../lib/view.ts';
 
 /** Source document for `dist/sheets/<slug>.pdf`. */
 export const getStaticPaths = (() =>
@@ -15,6 +15,7 @@ interface Props {
 const { chart } = Astro.props;
 
 const columns = visibleColumns(chart);
+const notes = chartNotes(chart);
 const groups = headerGroups(columns);
 const hasGroupRow = columns.some((c) => c.group);
 const sources = sourceMap(chart).filter((r) => r.columns.length > 0);
@@ -86,9 +87,9 @@ const cellPad = Math.max(0.6, rowHeight * 0.12);
                 <tr>
                   {columns.map((c, i) =>
                     i === 0 ? (
-                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</th>
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}{noteMarker(notes, row, c.key) && <sup>{noteMarker(notes, row, c.key)}</sup>}</th>
                     ) : (
-                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</td>
+                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}{noteMarker(notes, row, c.key) && <sup>{noteMarker(notes, row, c.key)}</sup>}</td>
                     ),
                   )}
                 </tr>
@@ -113,6 +114,11 @@ const cellPad = Math.max(0.6, rowHeight * 0.12);
         </span>
       ))
     }
+    {notes.map((n) => (
+      <span class="conditions">
+        {n.marker}. {n.text}
+      </span>
+    ))}
     {conditions.length > 0 && <span class="conditions">{conditions.join(' · ')}</span>}
     <span>
       <span class="domain">workshopcharts.com/{chart.slug}/</span> · last checked{' '}

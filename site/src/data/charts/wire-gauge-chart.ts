@@ -47,7 +47,7 @@ export const wireGaugeChart: Chart = {
     'Every size from 4/0 through 40 AWG, with no gaps. Includes 16–22 AWG for speaker and 12 V work.',
 
   // Five columns of numbers with thousands separators. Portrait would force the
-  // figures below a readable size at a metre.
+  // figures below a readable size at a meter.
   printOrientation: 'landscape',
 
   sources: [
@@ -62,7 +62,7 @@ export const wireGaugeChart: Chart = {
       id: 'area-identity',
       standard: 'Area identities',
       provides:
-        'Circular mils is the square of the diameter in mils. Area in mm² is πd²/4. Millimetre columns are the inch columns × 25.4 exactly.',
+        'Circular mils is the square of the diameter in mils. Area in mm² is πd²/4. Millimeter columns are the inch columns × 25.4 exactly.',
       definitional: true,
     },
     {
@@ -77,7 +77,7 @@ export const wireGaugeChart: Chart = {
     {
       id: 'astm-b258',
       standard: 'ASTM B258-18',
-      // Checked against the ASTM catalogue: the active document is listed as
+      // Checked against the ASTM catalog: the active document is listed as
       // B0258-18R26, the 2018 text reapproved in 2026. Same figures, current
       // designation. A citation that names a superseded revision sends the
       // reader to the wrong document, which is the one failure a source line
@@ -168,9 +168,9 @@ export const wireGaugeChart: Chart = {
 
   metaTitle: 'Wire Gauge Chart: AWG Sizes in Inches and mm',
   metaDescription:
-    'Full AWG wire gauge chart from 4/0 to 40: conductor diameter in inches and millimetres, area in circular mils and mm². Every column names the standard it comes from.',
+    'Full AWG wire gauge chart from 4/0 to 40: conductor diameter in inches and millimeters, area in circular mils and mm². Every column names the standard it comes from.',
   imageAlt:
-    'Wire gauge chart listing every AWG size from 4/0 to 40 with conductor diameter in inches and millimetres and cross-sectional area in mm².',
+    'Wire gauge chart listing every AWG size from 4/0 to 40 with conductor diameter in inches and millimeters and cross-sectional area in mm².',
 
   rows,
 

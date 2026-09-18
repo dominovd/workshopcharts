@@ -196,14 +196,74 @@ for (const file of files) {
    * where the en dash is the correct mark, and the minus sign in `D − P` is
    * arithmetic.
    */
+  /*
+   * What counts as copy the reader sees.
+   *
+   * Stripping every `<script>` was too broad. The structured data is a script
+   * block, and it carries the same sentences as the page: the FAQ answers go out
+   * twice, once into `<details>` and once into JSON-LD, and only the first was
+   * being checked. A spelling or a punctuation rule that holds on the page and
+   * not in the graph is half a rule, and the half that fails is the one search
+   * engines read. Behaviour scripts still come out, since their identifiers are
+   * not prose.
+   */
   const visible = html
-    .replace(/<script[\s\S]*?<\/script>/g, '')
+    .replace(/<script(?![^>]*application\/ld\+json)[\s\S]*?<\/script>/g, '')
     .replace(/<style[\s\S]*?<\/style>/g, '')
     .replace(new RegExp('<' + '!' + '--[\\s\\S]*?--' + '>', 'g'), '');
   const emDashes = (visible.match(/\u2014/g) ?? []).length;
   if (emDashes > 0) {
     const sample = visible.match(/.{0,45}\u2014.{0,45}/)?.[0].replace(/\s+/g, ' ').trim();
     fail(url, `has ${emDashes} em dash(es) in visible copy: "…${sample}…"`);
+  }
+
+  // ---- One spelling, and it is the one the sources use --------------------
+  /**
+   * American spellings, because the standards are American.
+   *
+   * The site had both: a column headed `Aluminum` over cells whose footnote said
+   * a column headed with the American spelling of the metal over cells whose
+   * footnote used the British one, and forty-seven American spellings against
+   * nineteen British ones across the charts. On a page whose whole proposition is that the
+   * reader can compare what is printed here against what is printed in the
+   * standard, a word that does not match the standard is a stumble on the first
+   * one they check. NEC, ASTM and ASME all write `aluminum`, the dimensions are
+   * inches and the sheet is US Letter, so the house spelling follows them.
+   *
+   * Checked in the built HTML rather than in the source: what matters is what
+   * reaches the reader, and this is the file that sees that.
+   */
+  /*
+   * The words are assembled from pieces on purpose.
+   *
+   * Written out whole, this list is a list of British spellings sitting in a
+   * file, and the first site-wide spelling pass found them and corrected them.
+   * Every entry then named the spelling it was meant to require, and the check
+   * failed every page on the site for using it. A rule that a find-and-replace
+   * can invert is not a rule. Splitting the literals puts them
+   * out of reach of the next one, the same trick this file already uses for the
+   * HTML comment opener a few checks down.
+   */
+  const BRITISH = [
+    ['alumin' + 'ium', 'aluminum'],
+    ['millimet' + 're', 'millimeter'],
+    ['catalog' + 'ue', 'catalog'],
+    ['behavi' + 'our', 'behavior'],
+    ['defen' + 'ce', 'defense'],
+    ['grey' + 'scale', 'grayscale'],
+    ['\\bmet' + 'res?\\b', 'meter, meters'],
+    ['\\bcent' + 're', 'center'],
+    ['\\blabel' + 'led\\b', 'labeled'],
+  ];
+  for (const [pattern, american] of BRITISH) {
+    const hit = visible.match(new RegExp(pattern, 'i'));
+    if (hit) {
+      const sample = visible
+        .match(new RegExp('.{0,40}' + pattern + '.{0,40}', 'i'))?.[0]
+        .replace(/\s+/g, ' ')
+        .trim();
+      fail(url, `uses "${hit[0]}" in visible copy; the house spelling is "${american}": "…${sample}…"`);
+    }
   }
 
   // ---- Authoring notes stay in the source --------------------------------
@@ -303,6 +363,10 @@ async function checkPrintedFiguresSurvive() {
     const wanted = new Set();
     for (const row of chart.rows) {
       for (const printed of Object.values(row.asPrinted ?? {})) wanted.add(printed);
+      // Footnote text travels the same way and fails the same way: a marker on a
+      // figure with its text missing from the page is a qualifier the reader
+      // cannot read, which is worse than no marker at all.
+      for (const note of Object.values(row.notes ?? {})) wanted.add(note);
     }
     if (wanted.size === 0) continue;
 

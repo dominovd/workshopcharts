@@ -8,7 +8,7 @@ import { trades, publishedCharts, pendingVerification, siteCounts } from '../../
  *
  * This is the site's real index, and at this size it is faster than search: a
  * reader scans thirty titles quicker than they can type what they want. Search
- * becomes the primary route when the catalogue outgrows one screen per trade,
+ * becomes the primary route when the catalog outgrows one screen per trade,
  * not before.
  *
  * The held charts are listed here by name, with the reason. A reader who came
@@ -53,7 +53,7 @@ const grouped = trades.map((t) => ({
 
   <div class="shell page">
     <header class="page__head">
-      <p class="eyebrow">Catalogue</p>
+      <p class="eyebrow">Catalog</p>
       <h1>All charts</h1>
       <p class="lede">
         {siteCounts.published} published, {siteCounts.inVerification} held pending a check.

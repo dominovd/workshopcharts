@@ -3,6 +3,7 @@ import { PUBLISHABLE } from './schema.ts';
 import { BUILD_DATE } from '../lib/view.ts';
 import { wireGaugeChart } from './charts/wire-gauge-chart.ts';
 import { wireResistanceChart } from './charts/wire-resistance-chart.ts';
+import { wireAmpacityChart } from './charts/wire-ampacity-chart.ts';
 import { drillBitSizeChart } from './charts/drill-bit-size-chart.ts';
 import { fractionDecimalMmChart } from './charts/fraction-decimal-mm-chart.ts';
 import { pendingCharts } from './charts/pending.ts';
@@ -11,6 +12,7 @@ import { pendingCharts } from './charts/pending.ts';
 export const allCharts: Chart[] = [
   wireGaugeChart,
   wireResistanceChart,
+  wireAmpacityChart,
   drillBitSizeChart,
   fractionDecimalMmChart,
   ...pendingCharts,
@@ -66,7 +68,7 @@ const TRADE_META: Record<Trade, { label: string; blurb: string }> = {
  *
  * The design draft carried "125+ charts", "140+", "90+" and "110+" on these
  * tiles — 465 charts, against a first-wave map of about thirty. Numbers on a
- * catalogue tile are a promise the next click either keeps or breaks, and the
+ * catalog tile are a promise the next click either keeps or breaks, and the
  * cheapest way to keep it is to make the tile incapable of saying anything the
  * registry does not contain.
  */

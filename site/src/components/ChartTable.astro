@@ -1,6 +1,6 @@
 ---
 import type { Chart } from '../data/schema.ts';
-import { visibleColumns, headerGroups, formatCell } from '../lib/view.ts';
+import { visibleColumns, headerGroups, formatCell, chartNotes, noteMarker } from '../lib/view.ts';
 
 interface Props {
   chart: Chart;
@@ -9,12 +9,13 @@ const { chart } = Astro.props;
 
 const columns = visibleColumns(chart);
 const hasGroupRow = columns.some((c) => c.group);
+const notes = chartNotes(chart);
 
 /**
  * Group header cells, one set per unit-toggle state.
  *
  * A `colspan` cannot be changed by CSS, so a `DIAMETER` header spanning an inch
- * and a millimetre column would stay two cells wide after one of them is hidden
+ * and a millimeter column would stay two cells wide after one of them is hidden
  * and knock the whole header out of line. Instead each mixed group emits all three
  * versions of itself — full span, imperial only, metric only — and the toggle
  * shows one. The DOM stays complete, which is the same requirement that keeps the
@@ -117,6 +118,9 @@ const groups = headerGroups(columns).flatMap((g) => {
                     data-variant-option={c.variant?.option}
                   >
                     {formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}
+                    {noteMarker(notes, row, c.key) && (
+                      <sup class="cell-note">{noteMarker(notes, row, c.key)}</sup>
+                    )}
                   </th>
                 ) : (
                   <td
@@ -125,6 +129,9 @@ const groups = headerGroups(columns).flatMap((g) => {
                     data-variant-option={c.variant?.option}
                   >
                     {formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}
+                    {noteMarker(notes, row, c.key) && (
+                      <sup class="cell-note">{noteMarker(notes, row, c.key)}</sup>
+                    )}
                   </td>
                 ),
               )}
@@ -135,12 +142,50 @@ const groups = headerGroups(columns).flatMap((g) => {
     </table>
   </div>
 
+  {
+    /*
+       The footnotes sit with the table, not in the source block, because they
+       qualify individual figures rather than the document a column came from.
+       Each carries its variant so it leaves with the columns it describes.
+    */
+    notes.length > 0 && (
+      <ol class="cell-notes-list">
+        {notes.map((n) => (
+          <li
+            value={n.marker}
+            data-variant-axis={n.variant?.axis}
+            data-variant-option={n.variant?.option}
+          >
+            {n.text}
+          </li>
+        ))}
+      </ol>
+    )
+  }
+
   <p class="no-match no-print" hidden>
     No size matches that. Clear the filter to see the full table.
   </p>
 </figure>
 
 <style>
+  .cell-note {
+    font-size: 0.7em;
+    margin-left: 0.15em;
+    color: var(--lime-ink);
+    font-weight: 700;
+  }
+
+  .cell-notes-list {
+    margin: var(--s-3) 0 0;
+    padding-left: 1.4rem;
+    display: grid;
+    gap: var(--s-2);
+    font-size: var(--step--2);
+    color: var(--ink-2);
+    max-width: 78ch;
+  }
+
   .chart-figure {
     margin: 0;
   }
