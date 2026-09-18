@@ -8,6 +8,7 @@ import SourceBlock from '../components/SourceBlock.astro';
 import SheetPreview from '../components/SheetPreview.astro';
 import SeriesPanel from '../components/SeriesPanel.astro';
 import { publishedCharts, trades, chartBySlug } from '../data/registry.ts';
+import { lastCheckedOn } from '../lib/view.ts';
 import type { Chart } from '../data/schema.ts';
 
 /**
@@ -54,7 +55,7 @@ const pageSchema = {
   isPartOf: { '@type': 'WebSite', name: 'Workshop Charts', url: Astro.site?.href },
   // The date the data was checked, not the date the page was deployed. The whole
   // point of tracking it is that it means something.
-  dateModified: chart.verification.verifiedOn,
+  dateModified: lastCheckedOn(chart),
   primaryImageOfPage: {
     '@type': 'ImageObject',
     contentUrl: new URL(`/sheets/${chart.slug}.png`, Astro.site).href,
@@ -116,7 +117,7 @@ const breadcrumbSchema = {
         </li>
         <li>
           <span class="badges__k mono">Last checked</span>
-          <span class="badges__v mono">{chart.verification.verifiedOn}</span>
+          <span class="badges__v mono">{lastCheckedOn(chart)}</span>
         </li>
         <li>
           <span class="badges__k mono">Sheet</span>

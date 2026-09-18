@@ -78,7 +78,7 @@ jobs:
         run: npm run build
 
       - name: Prepare prebuilt output
-        run: node scripts/vercel-output.mjs
+        run: npm run vercel:output
 
       - name: Deploy
         run: npx --yes vercel@latest deploy --prebuilt --prod --token "$VERCEL_TOKEN" --yes

@@ -15,6 +15,7 @@
 
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { publishedCharts } from '../src/data/registry.ts';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
 
@@ -285,6 +286,49 @@ async function htmlAssets(dir) {
   }
   return out;
 }
+
+/**
+ * A transcribed figure reaches the reader with the source's own digits.
+ *
+ * This is the check the `asPrinted` field exists for, and it has to live here
+ * rather than in `check-data.ts`. There, the string and the number both come
+ * from the same literal, so comparing them proves nothing: change one and the
+ * other changes with it. The claim worth testing is about the rendered page —
+ * that 0.100 reaches the reader as 0.100 and not as 0.1 or 0.1000 — and the only
+ * place that claim is falsifiable is the built HTML. A formatter that stopped
+ * consulting `asPrinted` would pass every data check and fail here.
+ */
+async function checkPrintedFiguresSurvive() {
+  for (const chart of publishedCharts) {
+    const wanted = new Set();
+    for (const row of chart.rows) {
+      for (const printed of Object.values(row.asPrinted ?? {})) wanted.add(printed);
+    }
+    if (wanted.size === 0) continue;
+
+    for (const route of [`${chart.slug}/index.html`, `sheet/print/${chart.slug}/index.html`]) {
+      let html;
+      try {
+        html = await readFile(join(DIST, route), 'utf8');
+      } catch {
+        fail(route, `expected page is missing for chart "${chart.slug}".`);
+        continue;
+      }
+      const text = html.replace(/<[^>]*>/g, ' ');
+      const missing = [...wanted].filter((figure) => !text.includes(figure));
+      if (missing.length > 0) {
+        fail(
+          route,
+          `${missing.length} transcribed figure(s) do not appear as the source prints them, ` +
+            `starting with "${missing[0]}". Something between the data and the page is ` +
+            `reformatting numbers that were copied from a standard.`,
+        );
+      }
+    }
+  }
+}
+
+await checkPrintedFiguresSurvive();
 
 await checkEveryAssetIsUsed(await Promise.all(files.map((f) => readFile(f, 'utf8'))));
 

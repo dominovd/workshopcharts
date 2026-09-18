@@ -82,7 +82,7 @@ const widestPerColumn = columns.map((c) =>
   Math.max(
     (c.group ?? '').length,
     c.label.length,
-    ...chart.rows.map((r) => formatCell(r.cells[c.key], c.precision).length),
+    ...chart.rows.map((r) => formatCell(r.cells[c.key], c.precision, r.asPrinted?.[c.key]).length),
   ),
 );
 const glyphsAcross = widestPerColumn.reduce((n, w) => n + w, 0) * blocks;
@@ -143,9 +143,9 @@ if (fontSize < MIN_LEGIBLE) {
                 <tr>
                   {columns.map((c, i) =>
                     i === 0 ? (
-                      <th scope="row">{formatCell(row.cells[c.key], c.precision)}</th>
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</th>
                     ) : (
-                      <td>{formatCell(row.cells[c.key], c.precision)}</td>
+                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</td>
                     ),
                   )}
                 </tr>

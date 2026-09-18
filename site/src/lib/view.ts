@@ -176,7 +176,10 @@ export function conditionChips(chart: Chart): ConditionChip[] {
 // Cells
 // ---------------------------------------------------------------------------
 
-export function formatCell(value: unknown, precision?: number): string {
+export function formatCell(value: unknown, precision?: number, asPrinted?: string): string {
+  // Transcribed figures render as the source printed them, trailing zeros and
+  // all. Rounding here would be this project rewriting a standard.
+  if (asPrinted !== undefined) return asPrinted;
   if (value === null || value === undefined) return 'n/a';
   if (typeof value === 'number') {
     return value.toLocaleString('en-US', {
@@ -255,4 +258,42 @@ export function standardsIndex(
   return [...byStandard.values()].sort((a, b) =>
     a.source.standard.localeCompare(b.source.standard),
   );
+}
+
+// ---------------------------------------------------------------------------
+// The date a chart was last checked
+// ---------------------------------------------------------------------------
+
+/**
+ * Build date, frozen once per build so every page agrees.
+ *
+ * `SOURCE_DATE_EPOCH` is honoured where CI sets it, so a rebuild of the same
+ * commit produces the same output.
+ */
+export const BUILD_DATE: string = new Date(
+  process.env.SOURCE_DATE_EPOCH ? Number(process.env.SOURCE_DATE_EPOCH) * 1000 : Date.now(),
+)
+  .toISOString()
+  .slice(0, 10);
+
+/**
+ * What the page should print as "last checked".
+ *
+ * The two truth levels answer this differently, and conflating them made the
+ * site say something untrue:
+ *
+ * `verified`  A person read the table back against the standard on a specific
+ *             day. That day is a fact, it is stored, and it never moves on its
+ *             own.
+ *
+ * `derived`   Every value is recomputed and re-checked by `check-data.ts` on
+ *             each build. The honest date is therefore THE BUILD DATE, not a
+ *             date written into the file months ago. The stored `verifiedOn`
+ *             had been sitting at 2026-08-17 while the figures behind it were
+ *             being re-derived on every deploy: the data was current and the
+ *             date was stale, which is the failure this project spends most of
+ *             its effort avoiding in the other direction.
+ */
+export function lastCheckedOn(chart: Chart): string {
+  return chart.verification.status === 'derived' ? BUILD_DATE : chart.verification.verifiedOn;
 }

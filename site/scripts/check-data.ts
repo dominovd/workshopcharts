@@ -122,6 +122,29 @@ function checkVerificationMetadata(chart: Chart): void {
     fail(chart, `status "needs-review" requires a note saying what must be checked.`);
   }
 
+  /**
+   * Preview placeholder, refused at the gate.
+   *
+   * A chart has to be `verified` to get a route, so there is no way to look at a
+   * finished page before signing for it. That is the right default and it makes
+   * one job awkward: reading the rendered table is often how a reviewer spots
+   * what is wrong with it, and the printable sheet and the PNG only exist after
+   * a build. `UNSIGNED` is the escape hatch. The build runs, so the page, the
+   * PDF and the PNG all appear locally; `scripts/vercel-output.mjs` refuses to
+   * package a chart in this state, so it cannot be deployed. The reviewer
+   * replaces the placeholder with a name, and that act is the signature.
+   */
+  if (v.verifiedBy?.includes('UNSIGNED')) {
+    notes.push(
+      `[${chart.slug}] PREVIEW ONLY: verifiedBy is "${v.verifiedBy}". The page, its PDF and ` +
+        `its PNG build so the table can be read before it is signed for, and ` +
+        `scripts/vercel-output.mjs refuses to package this state, so it cannot be deployed. ` +
+        `Read the chart's verification note, check the table against the source, then put a ` +
+        `real name in verifiedBy. To send it back to the holding pen instead, set status to ` +
+        `"needs-review" and keep the note.`,
+    );
+  }
+
   for (const col of chart.columns) {
     const cv = col.verification;
     if (cv?.status === 'needs-review' && !cv.note) {
@@ -151,6 +174,61 @@ function checkRowPresence(chart: Chart): void {
       const value = row.cells[col.key];
       if (value === null || value === undefined || value === '') {
         fail(chart, `row "${row.id}" has no value for visible column "${col.key}".`);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 3b. Transcribed figures render as the source printed them
+// ---------------------------------------------------------------------------
+
+/**
+ * `asPrinted` and `cells` must be the same figure.
+ *
+ * The string is what the reader sees and the number is what every other check
+ * in this file runs on, so the two drifting apart would mean the page shows one
+ * figure while the build verifies another — worse than either problem alone.
+ * Checking them against each other costs one line and removes that whole class.
+ *
+ * All-or-nothing per column: half a column carrying the source's own digits and
+ * half of it carrying whatever `precision` rounds to is a table that changes its
+ * mind partway down, and the reader has no way to see where.
+ */
+function checkPrintedFigures(chart: Chart): void {
+  for (const col of chart.columns) {
+    const withString = chart.rows.filter((r) => r.asPrinted?.[col.key] !== undefined);
+    if (withString.length === 0) continue;
+
+    if (withString.length !== chart.rows.length) {
+      fail(
+        chart,
+        `column "${col.key}" has asPrinted on ${withString.length} of ${chart.rows.length} rows. ` +
+          `A column is either transcribed or formatted, not both.`,
+      );
+    }
+
+    if (col.precision !== undefined) {
+      fail(
+        chart,
+        `column "${col.key}" declares both asPrinted and precision. asPrinted already fixes ` +
+          `the characters; precision would be a second rule for the same cells.`,
+      );
+    }
+
+    for (const row of withString) {
+      const printed = row.asPrinted![col.key]!;
+      const value = row.cells[col.key];
+      if (!/^-?\d+(\.\d+)?$/.test(printed)) {
+        fail(chart, `row "${row.id}" column "${col.key}": asPrinted "${printed}" is not a plain decimal.`);
+        continue;
+      }
+      if (typeof value !== 'number' || Number(printed) !== value) {
+        fail(
+          chart,
+          `row "${row.id}" column "${col.key}": asPrinted "${printed}" and cell value ` +
+            `${String(value)} are different figures.`,
+        );
       }
     }
   }
@@ -467,7 +545,10 @@ function checkStructure(chart: Chart, slugs: Set<string>): void {
   }
   for (const col of chart.columns) {
     const numeric = chart.rows.some((r) => typeof r.cells[col.key] === 'number');
-    if (numeric && col.precision === undefined) {
+    // A transcribed column is exempt: `asPrinted` already fixes the characters,
+    // and `checkPrintedFigures` fails it if precision is declared as well.
+    const transcribed = chart.rows.some((r) => r.asPrinted?.[col.key] !== undefined);
+    if (numeric && !transcribed && col.precision === undefined) {
       fail(
         chart,
         `numeric column "${col.key}" has no precision. Precision must be fixed per column, ` +
@@ -555,6 +636,7 @@ for (const chart of allCharts) {
   checkEveryColumnHasASource(chart);
   checkVerificationMetadata(chart);
   checkRowPresence(chart);
+  checkPrintedFigures(chart);
   checkMonotonic(chart);
   checkConversions(chart);
   checkDerived(chart);

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { publishedCharts } from '../data/registry.ts';
+import { lastCheckedOn } from '../lib/view.ts';
 
 /**
  * Sitemap.
@@ -32,7 +33,7 @@ export const GET: APIRoute = ({ site }) => {
     ...publishedCharts.map((c) => ({
       loc: `${base}/${c.slug}/`,
       priority: '1.0',
-      lastmod: c.verification.verifiedOn,
+      lastmod: lastCheckedOn(c),
     })),
   ];
 

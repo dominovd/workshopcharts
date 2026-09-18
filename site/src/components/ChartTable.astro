@@ -104,7 +104,7 @@ const groups = headerGroups(columns).flatMap((g) => {
             <tr
               data-row-id={row.id}
               data-search={columns
-                .map((c) => formatCell(row.cells[c.key], c.precision))
+                .map((c) => formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key]))
                 .join(' ')
                 .toLowerCase()}
             >
@@ -116,7 +116,7 @@ const groups = headerGroups(columns).flatMap((g) => {
                     data-variant-axis={c.variant?.axis}
                     data-variant-option={c.variant?.option}
                   >
-                    {formatCell(row.cells[c.key], c.precision)}
+                    {formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}
                   </th>
                 ) : (
                   <td
@@ -124,7 +124,7 @@ const groups = headerGroups(columns).flatMap((g) => {
                     data-variant-axis={c.variant?.axis}
                     data-variant-option={c.variant?.option}
                   >
-                    {formatCell(row.cells[c.key], c.precision)}
+                    {formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}
                   </td>
                 ),
               )}

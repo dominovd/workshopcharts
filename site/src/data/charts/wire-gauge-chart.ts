@@ -12,12 +12,18 @@ import { awgSeries } from '../../lib/derive.ts';
  * that circulate in hobby AWG tables. See `pending.ts` → `wire-ampacity-chart`,
  * which is held until NEC 310.16 and 240.4(D) are read directly.
  *
- * No resistance column yet. Resistance is real data from a different document
- * than the dimensions, and it is material-dependent. It is declared below and
- * held at column level, so its absence is stated on the page instead of being
- * something the reader has to notice.
+ * No resistance column. Resistance is real data from a different document than
+ * the dimensions, it is material-dependent, and its row set is not this one. It
+ * has its own page: see `wire-resistance-chart.ts`.
  */
 
+/*
+ * Resistance used to be scaffolded here and now lives on its own page.
+ * NEC Chapter 9 Table 8 runs 18 AWG to 4/0 and skips seven sizes; this table
+ * runs 4/0 to 40 with no gaps, so a resistance column here would be blank on 29
+ * of 44 rows, which `check:data` refuses for a published column. See
+ * `wire-resistance-chart.ts`.
+ */
 const rows: Row[] = awgSeries(-3, 40).map((r) => ({
   id: `awg-${r.label}`,
   cells: {
@@ -26,7 +32,6 @@ const rows: Row[] = awgSeries(-3, 40).map((r) => ({
     diameterMm: r.diameterMm,
     circularMils: r.circularMils,
     areaMm2: r.areaMm2,
-    resistanceCopper: null,
   },
 }));
 
@@ -72,18 +77,16 @@ export const wireGaugeChart: Chart = {
     {
       id: 'astm-b258',
       standard: 'ASTM B258-18',
+      // Checked against the ASTM catalogue: the active document is listed as
+      // B0258-18R26, the 2018 text reapproved in 2026. Same figures, current
+      // designation. A citation that names a superseded revision sends the
+      // reader to the wrong document, which is the one failure a source line
+      // is there to prevent.
+      edition: 'reapproved 2026',
       publisher: 'ASTM International',
       provides:
         'Tabulates the same nominal solid-conductor diameters and areas as the definition above. Cited as corroboration, not as the origin of these figures. B258 also gives equations for calculating resistance, but the tabulated resistance values this project would publish come from NEC Chapter 9 Table 8, which is why that is a separate row.',
       url: 'https://store.astm.org/b0258-18.html',
-    },
-    {
-      id: 'nec-ch9-t8',
-      standard: 'NEC Chapter 9, Table 8',
-      publisher: 'NFPA',
-      provides:
-        'DC resistance of copper and aluminium conductors. Governs the resistance column, which is not yet published.',
-      url: 'https://www.nfpa.org/codes-and-standards/nfpa-70-standard-development/70',
     },
   ],
 
@@ -141,21 +144,6 @@ export const wireGaugeChart: Chart = {
       convertedFrom: { column: 'circularMils', factor: 5.067074790974977e-4 },
       sources: ['area-identity'],
     },
-    {
-      key: 'resistanceCopper',
-      label: 'Ω / 1000 ft',
-      unit: 'ohm/kft',
-      system: 'both',
-      precision: 4,
-      monotonic: 'asc',
-      sources: ['nec-ch9-t8'],
-      conditions: ['Uncoated copper', 'DC at 75 °C', 'Solid conductor'],
-      verification: {
-        status: 'needs-review',
-        verifiedOn: '2026-08-17',
-        note: 'Held. Resistance is not derivable from the AWG definition, because it depends on conductivity, temperature and stranding, and differs for aluminium by roughly 1.6×. Transcribe NEC Chapter 9 Table 8 directly and sight-check both material columns before publishing. Publishing copper alone would also put a Copper / Aluminum toggle on the page with nothing behind one of its two states.',
-      },
-    },
   ],
 
   conditions: [
@@ -186,7 +174,7 @@ export const wireGaugeChart: Chart = {
 
   rows,
 
-  related: ['drill-bit-size-chart', 'fraction-to-decimal-chart'],
+  related: ['wire-resistance-chart', 'drill-bit-size-chart', 'fraction-to-decimal-chart'],
 
   howToUse: [
     'Find your AWG size in the first column, or type it into the filter.',

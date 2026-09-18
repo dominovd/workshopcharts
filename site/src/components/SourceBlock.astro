@@ -1,6 +1,6 @@
 ---
 import type { Chart } from '../data/schema.ts';
-import { sourceMap, heldColumns, conditionChips } from '../lib/view.ts';
+import { sourceMap, heldColumns, conditionChips, lastCheckedOn } from '../lib/view.ts';
 
 interface Props {
   chart: Chart;
@@ -11,6 +11,7 @@ const rows = sourceMap(chart);
 const held = heldColumns(chart);
 const chips = conditionChips(chart);
 const v = chart.verification;
+const checked = lastCheckedOn(chart);
 ---
 
 <section class="source-block" aria-labelledby="sources-heading">
@@ -123,8 +124,8 @@ const v = chart.verification;
   <p class="verified mono">
     {
       v.status === 'derived'
-        ? `Recomputed from the definitions above on every build · last build audit ${v.verifiedOn}`
-        : `Checked against the standards above by ${v.verifiedBy} · ${v.verifiedOn}`
+        ? `Recomputed from the definitions above on every build · last rebuilt and re-checked ${checked}`
+        : `Checked against the standards above by ${v.verifiedBy} · ${checked}`
     }
   </p>
 

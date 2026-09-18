@@ -205,6 +205,26 @@ export interface Row {
   /** Stable id used for deep links and the mobile card view. */
   id: string;
   cells: Record<string, CellValue>;
+  /**
+   * The figure exactly as the source prints it, keyed by column.
+   *
+   * A transcribed number loses its significant figures the moment it becomes a
+   * JavaScript number: the standard prints 0.100, 2.00 and 12.8, and `0.100` and
+   * `0.1` are the same value, so the trailing zero cannot be recovered. Fixed
+   * display precision then invents digits in the other direction, printing
+   * 12.8000 for a figure the standard gives to three significant figures.
+   *
+   * So the string travels with the number. `cells` stays numeric and every
+   * machine check keeps working on it; `asPrinted` is what the reader sees, and
+   * `check-data.ts` fails if the two disagree in value. A cell is then the same
+   * characters on the page as in the document it came from, which is a property
+   * a test can assert rather than a habit someone has to keep.
+   *
+   * Derived charts do not use this. A computed figure has no printed form to
+   * preserve, and its precision is a display decision, which is what `precision`
+   * is for.
+   */
+  asPrinted?: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------

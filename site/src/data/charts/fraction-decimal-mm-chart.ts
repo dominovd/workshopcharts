@@ -25,7 +25,7 @@ export const fractionDecimalMmChart: Chart = {
   slug: 'fraction-to-decimal-chart',
   title: 'Fraction to Decimal Chart',
   subtitle:
-    'Inch fractions with the count of 64ths, decimal inches, thousandths and millimetres. For reading a tape measure, a micrometer or a dial indicator.',
+    'Inch fractions with the count of 64ths, decimal inches, thousandths and millimetres. For reading a tape measure, a micrometer or a dial indicator and converting what you read.',
   trade: 'tools',
 
   completeness: 'continuous',
@@ -131,6 +131,10 @@ export const fractionDecimalMmChart: Chart = {
   ],
 
   faq: [
+    {
+      q: 'How is this different from the drill bit size chart?',
+      a: 'The rows are the same 64ths. The columns and the job are not. This page carries the count of 64ths and the thousandths, which is what you need to read a tape measure or a micrometer and convert what you read. The drill chart drops both columns and treats the same sizes as a bit list, for choosing a drill from an index.',
+    },
     {
       q: 'Is 25.4 mm an exact conversion?',
       a: 'Yes. The international yard and pound agreement of 1959 defined the inch as exactly 25.4 mm, so nothing on this page is a measurement or an approximation. Only the display is rounded.',

@@ -28,7 +28,7 @@ export const drillBitSizeChart: Chart = {
   title: 'Drill Bit Size Chart',
   seriesLabel: 'Fractional (64ths)',
   subtitle:
-    'Fractional drill bit sizes in 64ths, with decimal inch and millimetre equivalents.',
+    'The fractional bits in a drill index, 1/64 to 1 inch, with decimal inch and millimetre equivalents. For picking a bit at the machine.',
   trade: 'machining',
   series: 'drill-sizes',
 

@@ -27,7 +27,7 @@ const trade = trades.find((t) => t.id === chart.trade)!;
       <tbody>
         {
           rows.map((row) => (
-            <tr>{columns.map((c) => <td>{formatCell(row.cells[c.key], c.precision)}</td>)}</tr>
+            <tr>{columns.map((c) => <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</td>)}</tr>
           ))
         }
       </tbody>

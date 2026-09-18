@@ -1,6 +1,8 @@
 import type { Chart, Trade, TruthLevel } from './schema.ts';
 import { PUBLISHABLE } from './schema.ts';
+import { BUILD_DATE } from '../lib/view.ts';
 import { wireGaugeChart } from './charts/wire-gauge-chart.ts';
+import { wireResistanceChart } from './charts/wire-resistance-chart.ts';
 import { drillBitSizeChart } from './charts/drill-bit-size-chart.ts';
 import { fractionDecimalMmChart } from './charts/fraction-decimal-mm-chart.ts';
 import { pendingCharts } from './charts/pending.ts';
@@ -8,6 +10,7 @@ import { pendingCharts } from './charts/pending.ts';
 /** Every chart the project knows about, published or held. */
 export const allCharts: Chart[] = [
   wireGaugeChart,
+  wireResistanceChart,
   drillBitSizeChart,
   fractionDecimalMmChart,
   ...pendingCharts,
@@ -88,8 +91,13 @@ export const publishedTruthLevels: TruthLevel[] = [
   ...new Set(publishedCharts.map((c) => c.verification.status)),
 ];
 
-/** Most recent sight-check or build audit across the published set. */
+/**
+ * Most recent check across the published set.
+ *
+ * Computed from `lastCheckedOn`, so a chart that is re-derived on every build
+ * reports the build date rather than a date frozen in its data file.
+ */
 export const lastVerifiedOn: string = publishedCharts
-  .map((c) => c.verification.verifiedOn)
+  .map((c) => (c.verification.status === 'derived' ? BUILD_DATE : c.verification.verifiedOn))
   .sort()
   .at(-1)!;

@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import Sheet from '../../../layouts/Sheet.astro';
 import { publishedCharts } from '../../../data/registry.ts';
 import type { Chart } from '../../../data/schema.ts';
-import { visibleColumns, headerGroups, formatCell, sourceMap } from '../../../lib/view.ts';
+import { visibleColumns, headerGroups, formatCell, sourceMap, lastCheckedOn } from '../../../lib/view.ts';
 
 /** Source document for `dist/sheets/<slug>.pdf`. */
 export const getStaticPaths = (() =>
@@ -86,9 +86,9 @@ const cellPad = Math.max(0.6, rowHeight * 0.12);
                 <tr>
                   {columns.map((c, i) =>
                     i === 0 ? (
-                      <th scope="row">{formatCell(row.cells[c.key], c.precision)}</th>
+                      <th scope="row">{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</th>
                     ) : (
-                      <td>{formatCell(row.cells[c.key], c.precision)}</td>
+                      <td>{formatCell(row.cells[c.key], c.precision, row.asPrinted?.[c.key])}</td>
                     ),
                   )}
                 </tr>
@@ -116,7 +116,7 @@ const cellPad = Math.max(0.6, rowHeight * 0.12);
     {conditions.length > 0 && <span class="conditions">{conditions.join(' · ')}</span>}
     <span>
       <span class="domain">workshopcharts.com/{chart.slug}/</span> · last checked{' '}
-      {chart.verification.verifiedOn} · manufacturer figures for a specific assembly govern
+      {lastCheckedOn(chart)} · manufacturer figures for a specific assembly govern
     </span>
   </footer>
 </Sheet>
@@ -127,10 +127,24 @@ const cellPad = Math.max(0.6, rowHeight * 0.12);
     font-size: var(--pr-font);
   }
 
+  /*
+   * No `height` on the cell.
+   *
+   * The row height used to be written onto every cell from a build-time estimate
+   * of how much page was left after the heading and the footer. That estimate was
+   * a constant, and the footer is not: a sheet whose columns carry several
+   * condition lines has a taller one, and the resistance sheet overflowed onto a
+   * second page by two pixels because the constant had been fitted to a sheet
+   * with one condition.
+   *
+   * `height: 100%` on the table already makes the browser share the space among
+   * the rows, whatever is actually left. Letting it do that is both simpler and
+   * correct for every footer, where a number computed from a guess is only
+   * correct for the sheet it was guessed on.
+   */
   .sheet--print .sheet-body th,
   .sheet--print .sheet-body td {
     padding: var(--pr-pad) 4pt;
-    height: var(--pr-row);
   }
 
   .sheet--print .sheet-body thead th {

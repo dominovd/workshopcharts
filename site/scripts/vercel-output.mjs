@@ -20,6 +20,7 @@
 
 import { cp, mkdir, rm, writeFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+import { publishedCharts } from '../src/data/registry.ts';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 const DIST = join(ROOT, 'dist');
@@ -34,6 +35,30 @@ for (const required of ['index.html', 'sheets/wire-gauge-chart.png', 'sitemap.xm
     console.error(`\n  vercel-output FAILED: dist/${required} is missing. Run npm run build first.\n`);
     process.exit(1);
   }
+}
+
+/**
+ * An unsigned preview never leaves this machine.
+ *
+ * A chart needs `verified` to get a route at all, so the only way to read the
+ * finished page, the PDF and the PNG before signing for the table is to publish
+ * it locally under a placeholder name. That has to be safe, and the safe place
+ * for the stop is here rather than in `check:data`: the local build must run, or
+ * the sheets the reviewer is checking never get rendered. This script is the
+ * step that hands output to the host, and it is the last thing CI does before
+ * `vercel deploy --prebuilt`.
+ */
+const unsigned = publishedCharts.filter((c) => c.verification.verifiedBy?.includes('UNSIGNED'));
+if (unsigned.length > 0) {
+  console.error('\n  vercel-output FAILED: unsigned preview charts cannot be deployed.\n');
+  for (const c of unsigned) {
+    console.error(`  ✗ ${c.slug} is published as "${c.verification.verifiedBy}"`);
+  }
+  console.error(
+    '\n  Put a real name in verifiedBy after checking the table against its source,\n' +
+      '  or set status back to "needs-review" to return it to the holding pen.\n',
+  );
+  process.exit(1);
 }
 
 await rm(join(ROOT, '.vercel', 'output'), { recursive: true, force: true });
